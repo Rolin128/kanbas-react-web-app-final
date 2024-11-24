@@ -5,7 +5,7 @@ export default function TOC() {
     const { pathname } = useLocation();
     return (
         <ul className="nav nav-pills">
-            <li className="nav-item">
+            {/* <li className="nav-item">
                 <a id="wd-a" href="#/Labs" className="nav-link">
                     Labs
                 </a>
@@ -39,24 +39,24 @@ export default function TOC() {
                     className={`nav-link ${pathname.includes("Lab5") ? "active" : ""}`}>
                     Lab 5
                 </a>
-            </li>
+            </li> */}
             <li className="nav-item">
                 <a id="wd-k" href="#/Kanbas" className="nav-link">
                     Kanbas
                 </a>
             </li>
             <li className="nav-item">
-                <a id="wd-github" href="https://github.com/Rolin128/kanbas-react-web-app" className="nav-link">
+                <a id="wd-github" href="https://github.com/Rolin128/kanbas-react-web-app-final" className="nav-link">
                     My React GitHub
                 </a>
             </li>
             <li className="nav-item">
-                <a id="wd-github-node" href="https://github.com/Rolin128/kanbas-node-server-app" className="nav-link">
+                <a id="wd-github-node" href="https://github.com/Rolin128/kanbas-node-server-app-final" className="nav-link">
                     My Server GitHub
                 </a>
             </li>
             <li className="nav-item">
-                <a id="wd-render-link" href="https://kanbas-node-server-app-4mzq.onrender.com" className="nav-link">
+                <a id="wd-render-link" href="https://kanbas-node-server-app-final-we.onrender.com" className="nav-link">
                     Link to Render Root
                 </a>
             </li>

@@ -12,18 +12,20 @@ export default function Labs() {
     return (
         <Provider store={store}>
             <div id="wd-labs">
+            <h3>Group Member</h3>
                 Yuchen Li <br />
-                Section: 01
-                <h1>Labs</h1>
+                Yue He<br />
+                Zitong Bao<br />
+                <h1>Final Project</h1>
                 <TOC />
 
                 <Routes>
                     <Route path="/" element={<Navigate to="Lab1" />} />
-                    <Route path="Lab1" element={<Lab1 />} />
+                    {/* <Route path="Lab1" element={<Lab1 />} />
                     <Route path="Lab2" element={<Lab2 />} />
                     <Route path="Lab3/*" element={<Lab3 />} />
                     <Route path="Lab4" element={<Lab4 />} />
-                    <Route path="Lab5" element={<Lab5 />} />
+                    <Route path="Lab5" element={<Lab5 />} /> */}
                     {/* 添加"*"因为Labs will have its own routing */}
                 </Routes>
             </div>
