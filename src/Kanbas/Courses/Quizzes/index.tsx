@@ -1,0 +1,104 @@
+// import ModulesControls from "./QizModulesControls";
+
+import { BsGripVertical } from "react-icons/bs";
+import QizControlButtons from "./QizControlButtons";
+import { RiArrowDropDownFill } from "react-icons/ri";
+import React from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
+import * as db from "../../Database";
+import { setQuizzes,addQuiz } from "./reducer";
+import * as coursesClient from "../client";
+
+import './SearchBar.css';
+import './Elips.css';
+import { VscRocket } from "react-icons/vsc";
+
+import { Link, NavLink } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { FaPlus } from "react-icons/fa6";
+import { FaSearch } from 'react-icons/fa';
+import { IoEllipsisVertical } from "react-icons/io5";
+export default function Quizzes() {
+    const router = useNavigate();
+    const { cid } = useParams();
+    const dispatch = useDispatch();
+    const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+    const fetchQuizzes = async () => {
+        const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+        dispatch(setQuizzes(quizzes));
+    };
+    useEffect(() => {
+        fetchQuizzes();
+    }, []);
+    const createQuizForCourse = async () => {
+        if (!cid) return;
+        const newQuiz = await coursesClient.createQuizForCourse(cid as string);
+        dispatch(addQuiz(newQuiz));
+    };
+    const handleCreate=()=>{
+        createQuizForCourse();
+    }
+
+    return (
+        <div id="wd-quizzes">
+            <div>
+                <div className="mt-4 mb-4">
+                    <div className="text-nowrap">
+                        <div className="d-flex justify-content-end align-items-center">
+                            <div className="search-bar">
+                                <FaSearch className="search-icon" />
+                                <input className="search-input" type="text" placeholder="Search..." />
+                            </div>
+                            <button className="btn btn-lg btn-danger me-1 float-end" onClick={handleCreate} >
+                                <FaPlus className="position-relative me-2" style={{ bottom: "1px" }}/>
+                                Quiz</button>
+                            <button className="ev-btn btn-lg me-1 float-end">
+                                <IoEllipsisVertical className="position-relative" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <hr className="mb-4" />
+                <ul id="wd-quizzes-content" className="list-group rounded-0">
+                    <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
+                        <div className="wd-title p-3 ps-2 bg-secondary d-flex justify-content-between align-items-center">
+                            <div className="d-flex align-items-center">
+                                <BsGripVertical className="fs-3" />
+                                <RiArrowDropDownFill className="fs-3" />
+                                Assignment Quizzes
+                            </div>
+                        </div>
+                        <ul className="wd-lessons list-group rounded-0">
+                            {quizzes.map((quiz: any) => (
+                                <li key={quiz._id} className="wd-lesson list-group-item p-3 ps-1">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <div className="d-flex align-items-center">
+                                            <BsGripVertical className="me-2 fs-3 text-secondary" />
+                                            <VscRocket className="me-3 fs-4 text-success" />
+                                            <div>
+                                                {/* <Link to={`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}`}
+                                                    className="text-decoration-none"
+                                                    style={{ color: 'black' }}>
+                                                    {quiz.title}</Link> */}
+                                                    {/* fake link now */}
+                                                    {quiz.title}
+                                                <div className="text-secondary" style={{ fontSize: '0.8rem' }}>
+                                                    <span style={{ color: 'red' }}>Multiple Modules</span> ｜<b>Not available until</b> {quiz.available} | <b>Due</b> {quiz.due} | 100 pts
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div>
+                                            <QizControlButtons />
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    );
+}

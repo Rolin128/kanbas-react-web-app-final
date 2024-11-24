@@ -1,0 +1,7 @@
+.oval-label {
+    display: inline-block;
+    padding: 5px 15px;
+    background-color: secondary; 
+    border: 1px solid black; 
+    border-radius: 9999px; 
+  }
