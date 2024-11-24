@@ -1,0 +1,54 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body * {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (min-width: 768px) {
+    #wd-kanbas .wd-main-content-offset {
+        padding-left: 140px !important;
+    }
+}
+
+.list-group.wd>.list-group-item.active {
+    color: black;
+    background-color: white;
+    border-left: 3px solid black !important;
+}
+.list-group-dashboard.wd>.list-group-item.active {
+    color: #DC4C64;
+    background-color: white;
+    border-left: 3px solid black !important;
+}
+
+.wd-bli{
+    background-color:white;
+    color: black;
+    border-left: 3px solid black !important;
+}
+
+
+.wd-btn-secondary {
+    --bs-btn-color: #000;
+    --bs-btn-bg: #c7cdd1;
+    --bs-btn-border-color: #c7cdd1;
+    --bs-btn-hover-color: #c7cdd1;
+  }
+
+.bg-secondary {
+    --bs-secondary-rgb: 199, 205, 209;
+}
+
+.list-group-item {
+    --bs-list-group-border-color: rgb(164, 158, 158);
+}
+
+.wd-lesson {
+    border-left: 3px solid green !important;
+}
+
+
+

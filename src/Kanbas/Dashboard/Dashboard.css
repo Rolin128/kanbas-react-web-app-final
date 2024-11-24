@@ -1,0 +1,49 @@
+.wd-dashboard-course {
+    display: flex;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-img-top {
+    height: 160px;
+    object-fit: cover;
+}
+
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+
+.wd-dashboard-course-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 0.5rem;
+}
+
+
+.wd-dashboard-course-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; 
+    height: calc(1.5em * 3); 
+    -webkit-box-orient: vertical;
+    margin-bottom: 1rem;
+}
+
+.button-group {
+    display: flex;
+    margin-top: auto;
+}
+
+.wd-faculty-left-margin {
+    margin-left: 10px; 
+}

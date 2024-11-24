@@ -1,0 +1,13 @@
+.retrieve-assignments-button {
+    width: 130px;
+    /* Ensure the button only takes up as much space as needed */
+}
+
+.retrieve-assignment-title-button {
+    width: 80px;
+}
+
+.fix-lab-module-size-button {
+    width: fit-content;;
+}
+
