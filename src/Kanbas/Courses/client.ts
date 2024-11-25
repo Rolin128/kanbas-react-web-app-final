@@ -56,3 +56,4 @@ export const createQuizForCourse = async (
     );
     return response.data;
 };
+

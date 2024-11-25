@@ -5,6 +5,9 @@ import { addAssignment, updateAssignment, setAssignments } from "./reducer";
 import * as coursesClient from "../client";
 import * as assignmentsClient from "./client";
 import ProtectedContent from '../../Account/ProtectedContent';
+import { IoCalendarOutline, IoEllipsisVertical } from 'react-icons/io5';
+import { FcCancel } from "react-icons/fc";
+import { MdPublishedWithChanges } from "react-icons/md";
 
 export default function AssignmentEditor() {
     const dispatch = useDispatch();
@@ -40,14 +43,14 @@ export default function AssignmentEditor() {
         }
     }, [aidAssignment]);
 
-    const fetchAssignments = async () => {
-        const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
-        dispatch(setAssignments(assignments));
-    };
+    // const fetchAssignments = async () => {
+    //     const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+    //     dispatch(setAssignments(assignments));
+    // };
 
-    useEffect(() => {
-        fetchAssignments();
-    }, []);
+    // useEffect(() => {
+    //     fetchAssignments();
+    // }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
