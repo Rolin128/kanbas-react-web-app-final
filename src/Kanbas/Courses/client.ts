@@ -49,9 +49,10 @@ export const findQuizzesForCourse = async (courseId: string) => {
 
 export const createQuizForCourse = async (
     courseId: string,
+    quiz: any
 ) => {
     const response = await axios.post(
-        `${COURSES_API}/${courseId}/quizzes`,
+        `${COURSES_API}/${courseId}/quizzes/addNewQuiz`,
         {}
     );
     return response.data;

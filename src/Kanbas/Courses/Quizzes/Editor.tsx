@@ -5,24 +5,33 @@ import { FcCancel } from "react-icons/fc";
 import { MdPublishedWithChanges } from "react-icons/md";
 import { useNavigate, useParams } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { setQuizzes, addQuiz } from "./reducer";
+import { setQuizzes, addQuiz, updateQuiz } from "./reducer";
 import * as coursesClient from "../client";
+import * as quizzesClient from "./client";
 
 export default function QuizEditor() {
-    const { cid, qid } = useParams<{ cid: string; qid: string }>();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const router = useNavigate();
+    const { cid, qid } = useParams<{ cid: string; qid: string }>();
+    const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+
+
     const [haveTimeLimit, setTimeLimit] = useState(false);
 
-    const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+
     const qidQuiz = quizzes.find((quiz: any) => quiz._id === qid);
     const [quiz, setQuiz] = useState<any>({
-        _id: "1111",
-        title: '1111',
-        description: '2222',
-        type: 'GRADED_QUIZ',
-        points: 0,
+        course: cid,
+        title: 'Default',
+        description: '',
+        published: false,
+
+        points: 100,
+        due: '',
+        available: '',
+        until: '',
+        _id: ''
     });
     // TODO在哪里触发useEffect
     useEffect(() => {
@@ -33,6 +42,10 @@ export default function QuizEditor() {
                 title: qidQuiz.title || "",
                 description: qidQuiz.description || "",
                 points: qidQuiz.points || 0,
+                due: qidQuiz.due || "",
+                available: qidQuiz.available || "",
+                until: qidQuiz.until || "",
+                published: qidQuiz.published || false,
             });
         }
     }, [qidQuiz]);
@@ -53,6 +66,38 @@ export default function QuizEditor() {
             [name]: value,
         }));
     };
+    const createQuiz = async (quiz: any) => {
+        if (!cid) return;
+        const newQuiz = await coursesClient.createQuizForCourse(cid as string, quiz);
+        dispatch(addQuiz(newQuiz));
+    };
+    const saveQuiz = async (quiz: any) => {
+        await quizzesClient.updateQuiz(quiz);
+        dispatch(updateQuiz(quiz));
+    };
+    const handleSaveQuiz = () => {
+        if (quiz._id === qid) {
+            saveQuiz(quiz);
+            router(`/Kanbas/Courses/${cid}/quizzes`);
+        } else {
+            createQuiz({ ...quiz, _id: new Date().getTime().toString() });
+            router(`/Kanbas/Courses/${cid}/quizzes`);
+        }
+    };
+
+    const handleCancelQuiz = () => {
+        router(`/Kanbas/Courses/${cid}/quizzes`);
+    };
+    const handleTogglePublish = async () => {
+        const updatedQuiz = { ...quiz, published: !quiz.published };
+        await quizzesClient.updateQuiz(updatedQuiz);
+        dispatch(updateQuiz(updatedQuiz));
+        setQuiz(updatedQuiz);
+        if(!quiz.published){
+            router(`/Kanbas/Courses/${cid}/quizzes`);
+        }
+    };
+
 
     return (
         <div>
@@ -98,10 +143,31 @@ export default function QuizEditor() {
                     </ul>
                 </div>
                 <div>
+
+                    {/* 
+                <div className="mb-4">
+                        <label htmlFor="wd-assignment-name-o" className="form-label">Assignment Name</label>
+                        <input id="wd-assignment-name-o" className="form-control" name="title" value={assignment.title} onChange={handleChange} />
+                    </div>
+                    <div className="mb-4">
+                        <textarea id="wd-assignment-description" className="form-control" rows={10} cols={60}
+                            style={{ height: '400px' }} onChange={handleChange} name="description" value={assignment.description}>
+                        </textarea>
+                    </div> */}
+
+
                     {activeTab === 'details' && (
                         <div>
+                            <label htmlFor="wd-assignment-name-o" className="form-label">Quiz Name</label>
                             <input type="text" value={quiz.title} placeholder={quiz.title} className='form-control mb-2'
                                 onChange={(e) => setQuiz({ ...quiz, title: e.target.value })} />
+                            <label htmlFor="wd-assignment-name-o" className="form-label">Description</label>
+                            {/* 是否用handleChange包裹？ */}
+                            {/* <input type="text" value={quiz.description} placeholder={quiz.description} className='form-control'  style={{ height: '400px' }}
+                                onChange={(e) => setQuiz({ ...quiz, title: e.target.value })} /> */}
+                            <textarea id="wd-assignment-description" className="form-control" rows={10} cols={60}
+                                style={{ height: '400px' }} onChange={handleChange} name="description" value={quiz.description}>
+                            </textarea>
                             <div id='wd-quiz-instructions' className='mb-2 mt-3'>
                                 Quiz Instructions:
                                 <div id='wd-quiz-edit-tools'>
@@ -115,7 +181,7 @@ export default function QuizEditor() {
                                         Quiz Type
                                     </div>
                                     <div className='col-7'>
-                                        <select className='form-select' onChange={(e) => setQuiz({ ...quiz, type: e.target.value })}>
+                                        <select className='form-select' onChange={handleChange}>
                                             <option value="GRADED_QUIZ" selected={quiz.type === "GRADED_QUIZ"}>Graded Quiz</option>
                                             <option value="PRACTICE_QUIZ" selected={quiz.type === "PRACTICE_QUIZ"}>Practice Quiz</option>
                                             <option value="GRADE_SURVEY" selected={quiz.type === "GRADE_SURVEY"}>Graded Survey</option>
@@ -127,7 +193,7 @@ export default function QuizEditor() {
                                             Assignment Group
                                         </div>
                                         <div className='col-8'>
-                                            <select className='form-select' onChange={(e) => setQuiz({ ...quiz, assignmentGroup: e.target.value })}>
+                                            <select className='form-select' onChange={handleChange}>
                                                 <option value="Quizzes" selected={quiz.assignmentGroup === "Quizzes"}>Quizzes</option>
                                                 <option value="Exams" selected={quiz.assignmentGroup === "Exams"}>Exams</option>
                                                 <option value="Assignments" selected={quiz.assignmentGroup === "Assignments"}>Assignments</option>
@@ -141,7 +207,7 @@ export default function QuizEditor() {
                                         <div className='col-7'>
                                             <span className='fw-bold mb-2'>Options</span><br />
                                             <input type="checkbox" id='shuffle' checked={quiz.shuffleAnswers} style={{ zoom: 1.25 }}
-                                                onChange={(e) => setQuiz({ ...quiz, shuffleAnswers: e.target.checked })} />
+                                                onChange={handleChange} />
                                             <label htmlFor="shuffle" className='p-2 mb-3'>Shuffle Answers</label> <br />
 
                                             <div className='row mb-2'>
@@ -197,8 +263,8 @@ export default function QuizEditor() {
                                                     <span className='fw-bold'>Due</span><br />
 
                                                     <div className='input-group'>
-                                                        <input type="date" className='form-control' value={quiz.dueDate ? quiz.dueDate.slice(0, 10) : ""}
-                                                            onChange={(e) => setQuiz({ ...quiz, dueDate: e.target.value })} />
+                                                        <input type="date" className='form-control' value={quiz.due}
+                                                            onChange={(e) => setQuiz({ ...quiz, due: e.target.value })} />
                                                         <span className='input-group-text fs-5'></span>
                                                     </div>
                                                 </div>
@@ -208,8 +274,8 @@ export default function QuizEditor() {
                                                             <span className='fw-bold'>Available from</span><br />
 
                                                             <div className='input-group'>
-                                                                <input type="date" className='form-control' value={quiz.availableFrom ? quiz.availableFrom.slice(0, 10) : ""}
-                                                                    onChange={(e) => setQuiz({ ...quiz, availableFrom: e.target.value })} />
+                                                                <input type="date" className='form-control' value={quiz.available}
+                                                                    onChange={(e) => setQuiz({ ...quiz, available: e.target.value })} />
                                                                 <span className='input-group-text fs-5'></span>
                                                             </div>
                                                         </div>
@@ -217,8 +283,8 @@ export default function QuizEditor() {
                                                             <span className='fw-bold'>Until</span><br />
 
                                                             <div className='input-group'>
-                                                                <input type="date" className='form-control' value={quiz.availableUntil ? quiz.availableUntil.slice(0, 10) : ""}
-                                                                    onChange={(e) => setQuiz({ ...quiz, availableUntil: e.target.value })} />
+                                                                <input type="date" className='form-control' value={quiz.until}
+                                                                    onChange={(e) => setQuiz({ ...quiz, until: e.target.value })} />
                                                                 <span className='input-group-text fs-5'></span>
                                                             </div>
                                                         </div>
@@ -226,13 +292,35 @@ export default function QuizEditor() {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>                           
+                                    </div>
+                                    <div className='row mb-2'>
+                                        <div className='col-3 d-flex justify-content-end'>
+                                            Requirements
+                                        </div>
+                                        <div className='col-7'>
+                                            <div className='form-control'>
+                                                <input type="checkbox" id='webcamRequired' checked={quiz.webcamRequired} style={{ zoom: 1.25 }} className='mt-3'
+                                                    onChange={(e) => setQuiz({ ...quiz, webcamRequired: e.target.checked })} />
+                                                <label htmlFor="webcamRequired" className='p-1 ms-2'>Webcam Required</label>
+                                                <br />
+
+                                                <div className='row mt-3'>
+                                                    <label htmlFor="access-code" className='col'>Access Code</label>
+                                                    <input id="access-code" type="text" className='form-control col me-3' placeholder={quiz.accessCode}
+                                                        onChange={(e) => setQuiz({ ...quiz, accessCode: e.target.value })} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="d-flex justify-content-end mt-3">
-                                    <button className="btn btn-lg btn-secondary me-2 float-end" >Cancel</button>
-                                    <button className="btn btn-lg btn-danger float-end" >Save</button>
-                                    {/* <button className="btn btn-lg btn-secondary me-2" onClick={handleCancelEdit}>Cancel</button>
-                            <button className="btn btn-lg btn-danger" onClick={handleSaveQuiz}>Save</button> */}
+                                    {/* <button className="btn btn-lg btn-secondary me-2 float-end" >Cancel</button>
+                                    <button className="btn btn-lg btn-danger float-end" >Save</button> */}
+                                    <button className="btn btn-lg btn-secondary me-2" onClick={handleCancelQuiz}>Cancel</button>
+                                    <button className="btn btn-lg btn-danger me-2" onClick={handleSaveQuiz}>Save</button>
+                                    <button className="btn btn-lg btn-warning" onClick={handleTogglePublish}>
+                                            {quiz.published ? 'Unpublish' : 'Save and Publish'}
+                                        </button>
                                 </div>
                             </div>
                         </div>

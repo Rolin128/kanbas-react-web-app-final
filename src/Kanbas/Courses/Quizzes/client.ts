@@ -9,12 +9,16 @@ export const updateQuiz = async (quiz: any) => {
     );
     return data;
 };
-export const fetchQuizById = async (quizId: string) => {
-    try {
-        const response = await axios.get(`${QUIZZES_API}/${quizId}`);
-        return response.data;
-    } catch (error) {
-        console.error("Failed to fetch quiz:", error);
-        throw error;
-    }
+export const deleteQuiz = async (quizId: string) => {
+    const response = await axios.delete(`${QUIZZES_API}/${quizId}`);
+    return response.data;
 };
+// export const fetchQuizById = async (quiz: string) => {
+//     try {
+//         const response = await axios.get(`${QUIZZES_API}/${quiz._id}`);
+//         return response.data;
+//     } catch (error) {
+//         console.error("Failed to fetch quiz:", error);
+//         throw error;
+//     }
+// };

@@ -6,8 +6,10 @@ import React from 'react';
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import * as db from "../../Database";
-import { setQuizzes, addQuiz } from "./reducer";
+import { setQuizzes, addQuiz, deleteQuiz,updateQuiz } from "./reducer";
 import * as coursesClient from "../client";
+import * as quizzesClient from "./client";
+
 
 
 import './SearchBar.css';
@@ -33,19 +35,26 @@ export default function Quizzes() {
     useEffect(() => {
         fetchQuizzes();
     }, []);
-    const createQuizForCourse = async () => {
-        if (!cid) return;
-        const newQuiz = await coursesClient.createQuizForCourse(cid as string);
-        dispatch(addQuiz(newQuiz));
-    };
-    const handleCreate = () => {
-        createQuizForCourse();
-    }
+    // const createQuizForCourse = async (quiz: any) => {
+    //     if (!cid) return;
+    //     const newQuiz = await coursesClient.createQuizForCourse(cid as string, quiz);
+    //     dispatch(addQuiz(newQuiz));
+    // };
+
+    // const handleCreate = () => {
+    //     createQuizForCourse();
+    // }
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const handleEditQuiz = (quizId: string) => {
         navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}`);
         setActiveMenu(null); // Close the menu
     };
+    const removeQuiz = async (quizId: string) => {
+        await quizzesClient.deleteQuiz(quizId);
+        dispatch(deleteQuiz(quizId));
+        setActiveMenu(null); // Close the menu
+    };
+
 
     return (
         <div id="wd-quizzes">
@@ -57,12 +66,14 @@ export default function Quizzes() {
                                 <FaSearch className="search-icon" />
                                 <input className="search-input" type="text" placeholder="Search..." />
                             </div>
-                            <button className="btn btn-lg btn-danger me-1 float-end" onClick={handleCreate} >
+                            <Link className="btn btn-lg btn-danger me-1 float-end" to={`/Kanbas/Courses/${cid}/Quizzes/addNewQuiz`} >
                                 <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-                                Quiz</button>
+                                Quiz</Link>
+
                             <button className="ev-btn btn-lg me-1 float-end">
                                 <IoEllipsisVertical className="position-relative" />
                             </button>
+
                         </div>
                     </div>
                 </div>
@@ -91,7 +102,7 @@ export default function Quizzes() {
                                                 {/* fake link now */}
                                                 {quiz.title}
                                                 <div className="text-secondary" style={{ fontSize: '0.8rem' }}>
-                                                    <span style={{ color: 'red' }}>Multiple Modules</span> ｜<b>Not available until</b> {quiz.available} | <b>Due</b> {quiz.due} | 100 pts
+                                                    <span style={{ color: 'red' }}>Multiple Modules</span> ｜<b>Not available until</b> {quiz.available} | <b>Due</b> {quiz.due} | {quiz.points}
                                                 </div>
                                             </div>
                                         </div>
@@ -105,12 +116,18 @@ export default function Quizzes() {
                                             {activeMenu === quiz._id && (
                                                 <div className="dropdown-menu show position-absolute" style={{ right: 0 }}>
                                                     <button className="dropdown-item" onClick={() => handleEditQuiz(quiz._id)}>Edit</button>
-                                                    <button className="dropdown-item" >Delete</button>
-                                                    <button className="dropdown-item" >Publish
+                                                    <button className="dropdown-item" onClick={() => removeQuiz(quiz._id)}>Delete</button>
+                                                    <button className="dropdown-item" >{quiz.published ?  'Publish':'Unpublish' }
+{/* 
+                                                    <button className="btn btn-lg btn-warning" onClick={handleTogglePublish}>
+                                            {quiz.published ? 'Unpublish' : 'Publish'}
+                                        </button> */}
 
                                                     </button>
                                                 </div>
                                             )}
+
+
                                             {/* {activeMenu === quiz._id && currentUser.role !== 'STUDENT' && (
                                                 <div className="dropdown-menu show position-absolute" style={{ right: 0 }}>
                                                     <button className="dropdown-item" onClick={() => handleEditQuiz(quiz._id)}>Edit</button>

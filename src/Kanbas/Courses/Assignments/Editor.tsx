@@ -84,11 +84,22 @@ export default function AssignmentEditor() {
     const handleCancel = () => {
         router(`/Kanbas/Courses/${cid}/assignments`);
     };
+    const location = useLocation();
+    // console.log("Current Path:", location.pathname);
+    // const { '*': wildcard } = useParams();
+
+    // console.log("Current Path:", location.pathname);
+    // console.log("Assignment ID (aid):", aid);
+    // console.log("Wildcard:", wildcard);
 
     return (
         <ProtectedContent
             facultyContent={
                 <div id="wd-assignments-editor" className="container mt-5">
+                    {/* <p>Current Path: {location.pathname}</p>
+                    <p>Current Path: {location.pathname}</p>
+                    <p>Assignment ID (aid): {aid}</p>
+                    <p>Wildcard: {wildcard}</p> */}
                     <div className="mb-4">
                         <label htmlFor="wd-assignment-name-o" className="form-label">Assignment Name</label>
                         <input id="wd-assignment-name-o" className="form-control" name="title" value={assignment.title} onChange={handleChange} />

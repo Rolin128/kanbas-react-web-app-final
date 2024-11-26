@@ -32,8 +32,8 @@ export default function Courses({ courses }: { courses: any[]; }) {
                         <Route path="Modules" element={<Modules />} />
                         <Route path="Assignments" element={<Assignments />} />
                         {/* TODO 这个类的作用 */}
-                        <Route path="Assignments/addNewAss" element={<AssignmentEditor />} />
-                        <Route path="Assignments/:aid/*/addNewAss" element={<AssignmentEditor />} />
+                        {/* <Route path="Assignments/addNewAss" element={<AssignmentEditor />} /> */}
+                    
                         <Route path="Assignments/:aid/*" element={<AssignmentEditor />} />
                         <Route path="Quizzes" element={<Quizzes />} />
                         {/* <Route path="Quizzes/:quizId/edit" element={<QuizEditor />} /> */}
