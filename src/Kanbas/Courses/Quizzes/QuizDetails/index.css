@@ -1,0 +1,10 @@
+#wd-quiz-control-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+.custon-quiz-table th {
+  width: 30%;
+  text-align: right;
+  color: darkslategray !important;
+}
