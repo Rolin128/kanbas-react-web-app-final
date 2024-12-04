@@ -169,7 +169,7 @@ export default function QuestionEditor() {
             <div id='wd-css-styling-dropdowns' className='me-2'>
               <select
                 className='form-select'
-                value={question.type}
+                value={question.questionType}
                 onChange={(e) => {
                   const updatedQuestions = [...questions];
                   updatedQuestions[index].type = e.target.value as
@@ -194,7 +194,7 @@ export default function QuestionEditor() {
                 type='number'
                 className='form-control d-inline-block w-auto'
                 placeholder='0'
-                value={question.points}
+                value={question.pts}
                 onChange={(e) => {
                   const updatedQuestions = [...questions];
                   updatedQuestions[index].points = Number(e.target.value);

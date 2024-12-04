@@ -77,7 +77,7 @@ export default function PeopleDetails() {
                         onChange={(e) => setRole(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { saveUser(); } }}>
                         <option value="STUDENT">Students</option>
-                        <option value="TA">Assistants</option>
+                        {/* <option value="TA">Assistants</option> */}
                         <option value="FACULTY">Faculty</option>
                         <option value="ADMIN">Administrators</option>
                     </select>

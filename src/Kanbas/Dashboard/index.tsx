@@ -32,7 +32,7 @@ export default function Dashboard(
             </h1>
             <hr />
             <h2 id="wd-dashboard-published" className="wd-faculty-left-margin">
-                Published Courses ({courses.length})
+                {enrolling ? "Published Courses" : "My Enrolled Courses"} ({courses.length})
             </h2>
             <hr />
             {currentUser.role === 'FACULTY' && (
