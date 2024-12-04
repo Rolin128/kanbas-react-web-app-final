@@ -1,11 +1,13 @@
 import { useParams } from 'react-router';
 import FillInTheBlanksEditor from './FillInTheBlanksEditor';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import MCEditor from './MultipleChoiceEditor';
 import TFEditor from './TrueFalseEditor';
 import { FaTrash } from 'react-icons/fa';
 import { Navigate } from 'react-router-dom';
-import {updateQuiz, createQuiz, updateQuestion, createQuestion}  from "../client";
+import { updateQuiz, createQuiz, updateQuestion, createQuestionForQuiz } from "../client";
+import { useDispatch } from 'react-redux';
+import * as quizzesClient from "../client";
 
 interface Question {
   title: string;
@@ -60,6 +62,20 @@ export default function QuestionEditor() {
   //     },
   //   ]
   // );
+
+
+  const dispatch = useDispatch();
+  const fetchQuestions = async () => {
+    if (qid) {
+      const questions = await quizzesClient.findQuestionsForQuiz(qid);
+      setQuestions(questions);
+    }
+  };
+  useEffect(() => {
+    fetchQuestions();
+  }, []);
+
+
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   const renderEditor = (question: Question, index: number) => {
@@ -92,32 +108,32 @@ export default function QuestionEditor() {
 
   const handleSaveQuiz = async () => {
     try {
-        let savedQuiz;
-        if (qid) {
-            savedQuiz = await updateQuiz(quiz);
+      let savedQuiz;
+      if (qid) {
+        savedQuiz = await updateQuiz(quiz);
+      } else {
+        savedQuiz = await createQuiz(cid!);
+      }
+
+      const quizIdToUse = qid || savedQuiz._id;
+
+      // Save or update each question
+      for (const question of questions) {
+        if (question._id) {
+          await updateQuestion(quizIdToUse, question._id, question);
         } else {
-            savedQuiz = await createQuiz(cid!);
+          await createQuestionForQuiz(quizIdToUse, question);
         }
+      }
 
-        const quizIdToUse = qid || savedQuiz._id;
-
-        // Save or update each question
-        for (const question of questions) {
-            if (question._id) {
-                await updateQuestion(quizIdToUse, question._id, question);
-            } else {
-                await createQuestion(quizIdToUse, question);
-            }
-        }
-
-        alert('Quiz and questions saved successfully!');
+      alert('Quiz and questions saved successfully!');
     } catch (error) {
-        console.error('Error saving quiz:', error);
-        alert('Failed to save quiz');
+      console.error('Error saving quiz:', error);
+      alert('Failed to save quiz');
     }
-};
-  const handleCancel = async () => {};
-  const handleDeleteClick = async (questionId: string) => {};
+  };
+  const handleCancel = async () => { };
+  const handleDeleteClick = async (questionId: string) => { };
   const handleAddQuestion = () => {
     const newQuestion = {
       title: 'Unnamed Quiz',
@@ -230,3 +246,5 @@ export default function QuestionEditor() {
     </div>
   );
 }
+
+

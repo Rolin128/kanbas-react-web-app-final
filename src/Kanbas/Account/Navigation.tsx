@@ -14,6 +14,14 @@ export default function SignNavigation() {
             >
                 Signin
             </NavLink>
+            {currentUser && currentUser.role === "ADMIN" && (
+                <NavLink to="/Kanbas/Account/Users"
+                    className={({ isActive }) =>
+                        `list-group-item border border-0 ${isActive ? 'active' : 'text-danger'}`
+                    }
+                >
+                    Users
+                </NavLink>)}
 
             <NavLink
                 to="/Kanbas/Account/Signup"

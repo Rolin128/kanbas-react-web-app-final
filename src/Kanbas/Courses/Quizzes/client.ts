@@ -1,4 +1,5 @@
 import axios from "axios";
+const axiosWithCredentials = axios.create({ withCredentials: true });
 const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const QUIZZES_API = `${REMOTE_SERVER}/api/quizzes`;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
@@ -10,12 +11,12 @@ export const createQuiz = async (courseId: string) => {
 };
 
 export const updateQuiz = async (quiz: any) => {
-  const { data } = await axios.put(`${QUIZZES_API}/${quiz._id}`, quiz);
+  const { data } = await axiosWithCredentials.put(`${QUIZZES_API}/${quiz._id}`, quiz);
   return data;
 };
 
 export const deleteQuiz = async (quizId: string) => {
-  const response = await axios.delete(`${QUIZZES_API}/${quizId}`);
+  const response = await axiosWithCredentials.delete(`${QUIZZES_API}/${quizId}`);
   return response.data;
 };
 // export const fetchQuizById = async (quiz: string) => {
@@ -39,15 +40,20 @@ export const findQuiz = async (courseId: string, quizId: string) => {
 
 
 // Create a new question for a specific quiz
-export const createQuestion = async (quizId: string, questionData: any) => {
+export const createQuestionForQuiz = async (quizId: string, questionData: any) => {
   try {
-      const response = await axios.post(`${QUIZZES_API}/${quizId}/questions`, questionData);
+      const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/questions`, questionData);
       return response.data;
   } catch (error) {
       console.error("Failed to create question:", error);
       throw error;
   }
 };
+
+export const findQuestionsForQuiz = async(quizId:string) =>{
+  const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
+  return response.data;
+}
 
 // Update an existing question
 export const updateQuestion = async (quizId: string, questionId: string, questionData: any) => {

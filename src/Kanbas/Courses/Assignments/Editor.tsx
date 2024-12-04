@@ -5,9 +5,7 @@ import { addAssignment, updateAssignment, setAssignments } from "./reducer";
 import * as coursesClient from "../client";
 import * as assignmentsClient from "./client";
 import ProtectedContent from '../../Account/ProtectedContent';
-import { IoCalendarOutline, IoEllipsisVertical } from 'react-icons/io5';
-import { FcCancel } from "react-icons/fc";
-import { MdPublishedWithChanges } from "react-icons/md";
+
 
 export default function AssignmentEditor() {
     const dispatch = useDispatch();

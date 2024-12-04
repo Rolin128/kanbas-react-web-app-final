@@ -5,7 +5,6 @@ import { RiArrowDropDownFill } from "react-icons/ri";
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
-import * as db from "../../Database";
 import { setQuizzes, addQuiz, deleteQuiz, updateQuiz } from "./reducer";
 import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
@@ -128,13 +127,7 @@ export default function Quizzes() {
                       <BsGripVertical className="me-2 fs-3 text-secondary" />
                       <VscRocket className="me-3 fs-4 text-success" />
                       <div>
-                        <Link
-                          to={`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}`}
-                          className="text-decoration-none"
-                          style={{ color: "black" }}
-                        >
                           {quiz.title}
-                        </Link>
                         <br />
                         <div className="text-secondary" style={{ fontSize: "0.8rem" }}>
                           {quizAvailable(quiz)} &nbsp;|&nbsp; <b>Due</b> {formatDate(quiz.due)} &nbsp;|&nbsp;

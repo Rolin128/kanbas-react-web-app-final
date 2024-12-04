@@ -3,6 +3,7 @@ import AccountNavigation from "./Navigation";
 import Profile from "./Profile";
 import Signup from "./Signup";
 import Signin from "./Signin";
+import Users from "./Users";
 import { useSelector } from "react-redux";
 export default function Account() {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -17,6 +18,7 @@ export default function Account() {
                     <Route path="/Signin" element={<Signin />} />
                     <Route path="/Profile" element={<Profile />} />
                     <Route path="/Signup" element={<Signup />} />
+                    <Route path="/Users" element={<Users />} />
                 </Routes>
             </div>
         </div>
