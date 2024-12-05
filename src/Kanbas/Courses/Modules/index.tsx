@@ -14,9 +14,12 @@ import * as modulesClient from "./client";
 
 
 export default function Modules() {
-    const { cid } = useParams();
-    const [moduleName, setModuleName] = useState("");
+    const { cid, mid } = useParams<{ cid: string; mid: string }>();
+    const [moduleName, setModuleName] = useState<any>("new module");
     const { modules } = useSelector((state: any) => state.modulesReducer);
+    const module = modules.find((module:any) => module._id === mid);
+
+
     const dispatch = useDispatch();
     const saveModule = async (module: any) => {
         await modulesClient.updateModule(module);
