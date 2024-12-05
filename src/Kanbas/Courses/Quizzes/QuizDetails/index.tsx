@@ -157,14 +157,14 @@ export default function QuizDetails() {
               id="wd-preview-btn"
               className="btn btn-lg btn-secondary me-1 text-center"
               // TODO:  填入preview的route
-              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}`}
+              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}/details`}
             >
               Preview
             </Link>
             <Link
               id="wd-quiz-edit-btn"
               className="btn btn-lg btn-secondary me-1 text-center"
-              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}/editor`}
+              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}`}
             >
               <MdOutlineModeEditOutline />
               Edit

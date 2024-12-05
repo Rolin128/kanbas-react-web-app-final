@@ -127,7 +127,13 @@ export default function Quizzes() {
                       <BsGripVertical className="me-2 fs-3 text-secondary" />
                       <VscRocket className="me-3 fs-4 text-success" />
                       <div>
+                        <Link
+                          to={`/Kanbas/Courses/${cid}/Quizzes/${quiz._id}/details`}
+                          className="text-decoration-none"
+                          style={{ color: "black" }}
+                        >
                           {quiz.title}
+                        </Link>
                         <br />
                         <div className="text-secondary" style={{ fontSize: "0.8rem" }}>
                           {quizAvailable(quiz)} &nbsp;|&nbsp; <b>Due</b> {formatDate(quiz.due)} &nbsp;|&nbsp;

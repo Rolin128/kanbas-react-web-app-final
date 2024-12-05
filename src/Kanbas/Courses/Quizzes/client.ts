@@ -7,7 +7,6 @@ const COURSES_API = `${REMOTE_SERVER}/api/courses`;
 export const createQuiz = async (courseId: string) => {
   const response = await axios.post(`${COURSES_API}/${courseId}/quizzes`);
   return response.data;
-  
 };
 
 export const updateQuiz = async (quiz: any) => {
@@ -31,38 +30,36 @@ export const deleteQuiz = async (quizId: string) => {
 
 export const findQuiz = async (courseId: string, quizId: string) => {
   try {
-    const response = await axios.get(`${COURSES_API}/${courseId}/Quizzes/${quizId}`);
+    const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/Quizzes/${quizId}`);
     return response.data;
   } catch (error: any) {
     throw new Error("Error fetching quiz details: " + error.message);
   }
 };
 
-
 // Create a new question for a specific quiz
 export const createQuestionForQuiz = async (quizId: string, questionData: any) => {
   try {
-      const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/questions`, questionData);
-      return response.data;
+    const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/questions`, questionData);
+    return response.data;
   } catch (error) {
-      console.error("Failed to create question:", error);
-      throw error;
+    console.error("Failed to create question:", error);
+    throw error;
   }
 };
 
-export const findQuestionsForQuiz = async(quizId:string) =>{
+export const findQuestionsForQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
   return response.data;
-}
+};
 
 // Update an existing question
 export const updateQuestion = async (quizId: string, questionId: string, questionData: any) => {
   try {
-      const response = await axios.put(`${QUIZZES_API}/${quizId}/questions/${questionId}`, questionData);
-      return response.data;
+    const response = await axios.put(`${QUIZZES_API}/${quizId}/questions/${questionId}`, questionData);
+    return response.data;
   } catch (error) {
-      console.error("Failed to update question:", error);
-      throw error;
+    console.error("Failed to update question:", error);
+    throw error;
   }
 };
-
