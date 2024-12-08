@@ -12,6 +12,7 @@ export default function AssignmentEditor() {
     const router = useNavigate();
     const { cid, aid } = useParams<{ cid: string; aid: string }>();
     const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+    const navigate = useNavigate();
     // const { pathname } = useLocation();
 
     const aidAssignment = assignments.find((assignment: any) => assignment._id === aid);
@@ -41,15 +42,6 @@ export default function AssignmentEditor() {
         }
     }, [aidAssignment]);
 
-    // const fetchAssignments = async () => {
-    //     const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
-    //     dispatch(setAssignments(assignments));
-    // };
-
-    // useEffect(() => {
-    //     fetchAssignments();
-    // }, []);
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setAssignment((prev: any) => ({
@@ -67,6 +59,7 @@ export default function AssignmentEditor() {
     const saveAssignment = async (assignment: any) => {
         await assignmentsClient.updateAssignment(assignment);
         dispatch(updateAssignment(assignment));
+        navigate(0);
     };
 
     const handleSave = () => {
@@ -83,12 +76,6 @@ export default function AssignmentEditor() {
         router(`/Kanbas/Courses/${cid}/assignments`);
     };
     const location = useLocation();
-    // console.log("Current Path:", location.pathname);
-    // const { '*': wildcard } = useParams();
-
-    // console.log("Current Path:", location.pathname);
-    // console.log("Assignment ID (aid):", aid);
-    // console.log("Wildcard:", wildcard);
 
     return (
         <ProtectedContent

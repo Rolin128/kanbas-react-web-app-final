@@ -13,9 +13,9 @@ export default function Labs() {
         <Provider store={store}>
             <div id="wd-labs">
             <h3>Group Member</h3>
-                Yuchen Li <br />
-                Yue He<br />
-                Zitong Bao<br />
+                Yuchen Li : Section 01<br />
+                Yue He : Section 03<br />
+                Zitong Bao : Section 01<br />
                 <h1>Final Project</h1>
                 <TOC />
 

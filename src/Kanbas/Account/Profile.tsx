@@ -16,6 +16,7 @@ export default function Profile() {
             setMessage("Update successfully!");
             // 3秒后清除消息
             setTimeout(() => setMessage(""), 3000);
+            navigate(0);
         } catch (error) {
             setMessage("Update failed. Please try again.");
             setTimeout(() => setMessage(""), 3000);
@@ -54,7 +55,7 @@ export default function Profile() {
                     <input defaultValue={profile.email} id="wd-email" className="form-control mb-2"
                         placeholder="xxx@gmail.com"
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })} />
-                    <select onChange={(e) => setProfile({ ...profile, role: e.target.value })}
+                    <select value={profile.role} onChange={(e) => setProfile({ ...profile, role: e.target.value })}
                         className="form-control mb-2" id="wd-role" >
                         {/* <option value="USER">User</option> <option value="ADMIN">Admin</option> */}
                         <option value="STUDENT">Student</option>

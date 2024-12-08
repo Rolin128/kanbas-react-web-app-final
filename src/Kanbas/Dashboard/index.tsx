@@ -20,22 +20,25 @@ export default function Dashboard(
     }) {
 
     const { currentUser } = useSelector((state: any) => state.accountReducer);
+    const handleDeleteCourse = (course: any) => {
+        deleteCourse(course._id);
+    };
 
 
     return (
         <div>
             <h1 id="wd-dashboard-title" className="wd-faculty-left-margin">
-                Dashboard
+                {enrolling ? "Courses registration Dashboard" : "My Courses Dashboard"}
                 <button onClick={() => setEnrolling(!enrolling)} className="float-end btn btn-primary" >
                     {enrolling ? "My Courses" : "All Courses"}
                 </button>
             </h1>
             <hr />
             <h2 id="wd-dashboard-published" className="wd-faculty-left-margin">
-                {enrolling ? "Published Courses" : "My Enrolled Courses"} ({courses.length})
+                {enrolling ? "All Published Courses" : "My Enrolled Courses"} ({courses.length})
             </h2>
             <hr />
-            {currentUser.role === 'FACULTY' && (
+            {currentUser.role === 'FACULTY' && !enrolling && (
                 <>
                     <h5 className="wd-faculty-left-margin">New Course
                         <button className="btn btn-primary float-end"
@@ -64,6 +67,38 @@ export default function Dashboard(
                             />
                             <div className="card-body">
                                 <h5 className="wd-dashboard-course-title card-title text-primary">
+                                    {course.name}
+                                </h5>
+                                <p className="wd-dashboard-course-text card-text">
+                                    {course.description}
+                                </p>
+
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    {!enrolling && (
+                                        <>
+                                            <Link to={`/Kanbas/Courses/${course._id}/Home`} className="btn btn-primary ">
+                                                Go
+                                            </Link>
+                                            {currentUser.role === 'FACULTY' && (
+                                                <>
+                                                    <button id="wd-edit-course-button"
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            setCourse(course)
+                                                        }}
+                                                        className="btn btn-warning me-2" style={{ marginLeft: 'auto' }} >
+                                                        Edit
+                                                    </button>
+                                                    <button onClick={(event) => {
+                                                        event.preventDefault();
+                                                        handleDeleteCourse(course);
+                                                    }} className="btn btn-danger" id="wd-delete-course-button">
+                                                        Delete
+                                                    </button>
+                                                </>
+                                            )}
+                                        </>
+                                    )}
                                     {enrolling && (
                                         <button
                                             onClick={(event) => {
@@ -74,39 +109,10 @@ export default function Dashboard(
                                             {course.enrolled ? "Unenroll" : "Enroll"}
                                         </button>
                                     )}
-                                    {course.name}
-                                </h5>
-                                <p className="wd-dashboard-course-text card-text">
-                                    {course.description}
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <Link to={`/Kanbas/Courses/${course._id}/Home`} className="btn btn-primary ">
-                                        Go
-                                    </Link>
-                                    {currentUser.role === 'FACULTY' && (
-                                        <>
-                                            <button id="wd-edit-course-button"
-                                                onClick={(event) => {
-                                                    event.preventDefault();
-                                                    setCourse(course)
-                                                }}
-                                                className="btn btn-warning me-2" style={{ marginLeft: 'auto' }} >
-                                                Edit
-                                            </button>
-                                            <button onClick={(event) => {
-                                                event.preventDefault();
-                                                deleteCourse(course._id);
-                                            }} className="btn btn-danger" id="wd-delete-course-button">
-                                                Delete
-                                            </button>
-                                        </>
-                                    )}
                                 </div>
                             </div>
-
                         </div>
                     </div>
-
                 ))}
             </div>
         </div>

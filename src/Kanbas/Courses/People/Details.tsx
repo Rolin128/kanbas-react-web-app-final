@@ -23,16 +23,24 @@ export default function PeopleDetails() {
         if (!uid) return;
         const user = await client.findUserById(uid);
         setUser(user);
+        setName(`${user.firstName} ${user.lastName}`);
+        setEmail(user.email);
+        setRole(user.role);
     };
     const saveUser = async () => {
         const [firstName, lastName] = name.split(" ");
-        const updatedUser = { ...user, firstName, lastName, email, role };
+        const updatedUser = {
+            ...user,
+            ...(editingname ? { firstName, lastName } : {}),
+            ...(editingemail ? { email } : {}),
+            ...(editingrole ? { role } : {})
+        };
         await client.updateUser(updatedUser);
         setUser(updatedUser);
         seteditingName(false);
         seteditingEmail(false);
         seteditingRole(false);
-        navigate(-1);
+        navigate(0);
     };
     useEffect(() => {
         if (uid) fetchUser();

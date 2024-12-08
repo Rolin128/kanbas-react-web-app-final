@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ModulesControls from "./ModulesControls";
 import LessonControlButtons from "./LessonControlButtons";
 import { BsGripVertical } from "react-icons/bs"
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import ModuleControlButtons from "./ModuleControlButtons";
 import { setModules, addModule, editModule, updateModule, deleteModule }
     from "./reducer";
@@ -17,7 +17,8 @@ export default function Modules() {
     const { cid, mid } = useParams<{ cid: string; mid: string }>();
     const [moduleName, setModuleName] = useState<any>("new module");
     const { modules } = useSelector((state: any) => state.modulesReducer);
-    const module = modules.find((module:any) => module._id === mid);
+    const module = modules.find((module: any) => module._id === mid);
+    const navigate = useNavigate();
 
 
     const dispatch = useDispatch();
@@ -37,6 +38,7 @@ export default function Modules() {
         const newModule = { name: moduleName, course: cid };
         const module = await coursesClient.createModuleForCourse(cid, newModule);
         dispatch(addModule(module));
+        navigate(0);
     };
     const removeModule = async (moduleId: string) => {
         await modulesClient.deleteModule(moduleId);
@@ -49,9 +51,9 @@ export default function Modules() {
                 <ProtectedContent
                     facultyContent={<div>
                         <ModulesControls setModuleName={setModuleName} moduleName={moduleName} addModule={createModuleForCourse} />
-                        <br /><br /><br /><br />
                     </div>}
                     studentContent={undefined} />
+                <br /><br /><br />
                 <ul id="wd-modules" className="list-group rounded-0">
                     {modules.map((module: any) => (
                         <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
