@@ -3,6 +3,8 @@ const axiosWithCredentials = axios.create({ withCredentials: true });
 const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER;
 const QUIZZES_API = `${REMOTE_SERVER}/api/quizzes`;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
+const QUESTIONS_API = `${REMOTE_SERVER}/api/questions`;
+
 
 export const createQuiz = async (courseId: string) => {
   const response = await axios.post(`${COURSES_API}/${courseId}/quizzes`);
@@ -18,6 +20,7 @@ export const deleteQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.delete(`${QUIZZES_API}/${quizId}`);
   return response.data;
 };
+
 // export const fetchQuizById = async (quiz: string) => {
 //     try {
 //         const response = await axios.get(`${QUIZZES_API}/${quiz._id}`);
@@ -28,6 +31,11 @@ export const deleteQuiz = async (quizId: string) => {
 //     }
 // };
 
+export const findQuizById = async (quizId: string) => {
+	const response = await axios.get(`${QUIZZES_API}/${quizId}`)
+	return response.data
+}
+
 export const findQuiz = async (courseId: string, quizId: string) => {
   try {
     const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/Quizzes/${quizId}`);
@@ -37,29 +45,43 @@ export const findQuiz = async (courseId: string, quizId: string) => {
   }
 };
 
-// Create a new question for a specific quiz
-export const createQuestionForQuiz = async (quizId: string, questionData: any) => {
-  try {
-    const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/questions`, questionData);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to create question:", error);
-    throw error;
-  }
-};
-
-export const findQuestionsForQuiz = async (quizId: string) => {
-  const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
+// Creata question
+export const createQuestion = async (quizId: string, question: any) => {
+  const response = await axios.post(`${QUIZZES_API}/${quizId}/questions`, question);
   return response.data;
 };
 
+
 // Update an existing question
-export const updateQuestion = async (quizId: string, questionId: string, questionData: any) => {
+export const updateQuestion = async (questionId: string, questionData: any) => {
   try {
-    const response = await axios.put(`${QUIZZES_API}/${quizId}/questions/${questionId}`, questionData);
-    return response.data;
+      const response = await axios.put(`${QUESTIONS_API}/${questionId}`, questionData);
+      return response.data;
   } catch (error) {
     console.error("Failed to update question:", error);
     throw error;
   }
 };
+
+// Delete a question
+export const deleteQuestion = async (questionId: string) => {
+  try {
+      const response = await axios.delete(`${QUESTIONS_API}/${questionId}`);
+      return response.data;
+  } catch (error) {
+      console.error("Failed to delete question:", error);
+      throw error;
+  }
+};
+
+
+// Find all questions for a specific quiz
+export const findAllQuestionsByQuizId = async (quizId: string) => {
+  const response = await axios.get(`${QUIZZES_API}/${quizId}/questions`);
+  return response.data;
+};
+
+
+
+
+
