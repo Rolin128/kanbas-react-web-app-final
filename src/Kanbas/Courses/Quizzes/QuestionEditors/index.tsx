@@ -33,6 +33,18 @@ export default function QuestionEditor() {
   const { qid } = useParams<{ qid: string }>();
   const [questions, setQuestions] = useState<any[]>([]);
   // const [questions, setQuestions] = useState<Question[]>(
+    const [question, setQuestion] = useState<Question>({
+      title: 'string',
+      _id: 'string',
+      text: 'string',
+      points: 100,
+      description: 'string',
+      type: 'multiple-choice', // 使用其中一个允许的类型值
+      answers: [] // 初始化为空数组
+      // options 是可选的，所以可以不设置
+  });
+
+
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
@@ -57,40 +69,6 @@ export default function QuestionEditor() {
     
       fetchQuizData();
     }, [qid]);
-    
-
-    //   // 下面这堆question是用来看效果的，将来需要删掉
-  //   [
-  //     {
-  //       title: "Question 1",
-  //       _id: "q1",
-  //       text: "What is the capital of France?",
-  //       points: 10,
-  //       description: "A geography question",
-  //       type: "multiple-choice",
-  //       options: ["Paris", "London", "Berlin", "Madrid"],
-  //       answers: ["Paris"],
-  //     },
-  //     {
-  //       title: "Question 2",
-  //       _id: "q2",
-  //       text: "The earth is flat.",
-  //       points: 5,
-  //       description: "A true/false question",
-  //       type: "true-false",
-  //       answers: ["false"],
-  //     },
-  //     {
-  //       title: "Question 3",
-  //       _id: "q3",
-  //       text: "Fill in the blank: The sky is ___ during the day.",
-  //       points: 8,
-  //       description: "A fill-in-the-blank question",
-  //       type: "fill-in-the-blank",
-  //       answers: ["blue"],
-  //     },
-  //   ]
-  // );
 
 
   const renderEditor = (question: Question, index: number) => {
@@ -118,7 +96,28 @@ export default function QuestionEditor() {
   };
 
   // TODO: 下面这些还需要补充完成才能传输数据
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = async (questionId: string) => {
+    try {
+      // Find the specific question by its _id
+      const questionToUpdate = questions.find((q) => q._id === questionId);
+  
+      if (!questionToUpdate) {
+        alert("Question not found");
+        return;
+      }
+  
+      // Update the question in the backend
+      
+  
+      // Optional: Refresh the questions list by re-fetching
+      const updatedQuestions = await updateQuestion(questionId, questionToUpdate); 
+      setQuestion(updatedQuestions);
+  
+      alert("Question updated successfully!");
+    } catch (error) {
+      console.error("Error updating question:", error);
+      alert("Failed to update question. Please try again.");
+    }
   };
 
 //   const handleSaveQuiz = async () => {
@@ -323,7 +322,7 @@ const handleSaveQuiz = async () => {
             <button
               type='button'
               className='btn btn-danger'
-              onClick={handleSaveChanges}
+              onClick={() => handleSaveChanges(question._id)} 
             >
               Update Question
             </button>
