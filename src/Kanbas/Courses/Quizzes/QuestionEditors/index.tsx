@@ -8,6 +8,8 @@ import { FaTrash } from 'react-icons/fa';
 import { Navigate } from 'react-router-dom';
 import {findQuizById, findAllQuestionsByQuizId, updateQuiz, createQuiz, updateQuestion, createQuestion, deleteQuestion}  from "../client";
 
+
+
 interface Question {
   title: string;
   _id: string;
@@ -20,58 +22,299 @@ interface Question {
 }
 
 
-
-
 interface Quiz {
   _id: string;
   points: number;
 }
 
-
 export default function QuestionEditor() {
   const { cid } = useParams();
   const { qid } = useParams<{ qid: string }>();
   const [questions, setQuestions] = useState<any[]>([]);
-  // const [questions, setQuestions] = useState<Question[]>(
-    const [question, setQuestion] = useState<Question>({
-      title: 'string',
-      _id: 'string',
-      text: 'string',
-      points: 100,
-      description: 'string',
-      type: 'multiple-choice', // 使用其中一个允许的类型值
-      answers: [] // 初始化为空数组
-      // options 是可选的，所以可以不设置
-  });
-
-
-
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
-    // Fetch quiz and questions on component mount
-    useEffect(() => {
-      const fetchQuizData = async () => {
-        if (!qid) return;
-    
-        try {
-          console.log('Fetching quiz data...');
-          const fetchedQuiz = await findQuizById(qid);
-          console.log('Fetched quiz:', fetchedQuiz);
-          setQuiz(fetchedQuiz);
-    
-          const fetchedQuestions = await findAllQuestionsByQuizId(qid);
-          console.log('Fetched questions:', fetchedQuestions);
-          setQuestions(fetchedQuestions);
-        } catch (error) {
-          console.error('Error fetching quiz or questions:', error);
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      if (!qid) return;
+
+      try {
+        const fetchedQuiz = await findQuizById(qid);
+        setQuiz(fetchedQuiz);
+
+        const fetchedQuestions = await findAllQuestionsByQuizId(qid);
+        setQuestions(
+          fetchedQuestions.map((q: any) => ({ ...q, isEditing: false })) // Add isEditing flag
+        );
+      } catch (error) {
+        console.error('Error fetching quiz or questions:', error);
+      }
+    };
+
+    fetchQuizData();
+  }, [qid]);
+
+  const handleAddQuestion = () => {
+    const newQuestion = {
+      title: 'New Question',
+      type: 'multiple-choice',
+      points: 0,
+      text: '',
+      options: ['Option 1', 'Option 2'],
+      answers: [],
+      isEditing: true, // Start in edit mode
+    };
+    setQuestions([...questions, newQuestion]);
+  };
+
+  const handleSaveQuiz = async () => {
+    console.log(qid !!!!!!!);
+      console.log(quiz?._id !!!!!!!!!!!!!!!!!!!!);
+      console.log("Saving quiz. Current quiz state:", quiz);
+    try {
+      if (!quiz) {
+        throw new Error("Quiz object is not initialized.");
+      }
+  
+      let savedQuiz;
+      if (qid) {
+        // Check if the quiz has a valid `_id` before updating
+        if (!quiz._id) {
+          throw new Error("Quiz ID is missing.");
         }
-      };
-    
-      fetchQuizData();
-    }, [qid]);
+        savedQuiz = await updateQuiz(quiz);
+      } else {
+        savedQuiz = await createQuiz(cid!);
+        setQuiz(savedQuiz); // Update state with the new quiz
+      }
+  
+      const quizIdToUse = qid || savedQuiz._id;
+      if (!quizIdToUse) {
+        throw new Error("Quiz ID is missing after save.");
+      }
+  
+      for (const question of questions) {
+        if (question._id) {
+          await updateQuestion(quizIdToUse,  question);
+        } else {
+          await createQuestion(quizIdToUse, question);
+        }
+      }
+  
+      alert("Quiz and questions saved successfully!");
+    } catch (error) {
+      console.error("Error saving quiz:", error);
+      alert(`Failed to save quiz: ${error}`);
+    }
+  };
+  
+  
+    const handleCancel = async () => {};
 
+  
 
-  const renderEditor = (question: Question, index: number) => {
+  const handleEditClick = (index: number) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index].isEditing = true;
+    setQuestions(updatedQuestions);
+  };
+
+  // const handleSaveChanges = async (index: number) => {
+  //   try {
+  //     const questionToSave = questions[index];
+  
+  //     let savedQuestion;
+  //     if (questionToSave._id.startsWith('new')) {
+  //       // Create a new question
+  //       savedQuestion = await createQuestion(qid!, questionToSave);
+  //     } else {
+  //       // Update existing question
+  //       savedQuestion = await updateQuestion(qid!, questionToSave);
+  //     }
+  
+  //     // Update the question in the state with the saved version and exit editing mode
+  //     const updatedQuestions = [...questions];
+  //     updatedQuestions[index] = { ...savedQuestion, isEditing: false };
+  //     setQuestions(updatedQuestions);
+  
+  //     alert('Question saved successfully!');
+  //   } catch (error) {
+  //     console.error('Error saving question:', error);
+  //     alert('Failed to save the question.');
+  //   }
+  // };
+  
+  const handleSaveChanges = async (index: number) => {
+    try {
+      const questionToSave = questions[index];
+  
+      let savedQuestion;
+      if (!questionToSave._id) {
+        // Create a new question
+        savedQuestion = await createQuestion(qid!, questionToSave);
+      } else {
+        // Update existing question
+        savedQuestion = await updateQuestion(qid!, questionToSave);
+      }
+  
+      // Update the question in the state with the saved version and exit editing mode
+      const updatedQuestions = [...questions];
+      updatedQuestions[index] = { ...savedQuestion, isEditing: false };
+      setQuestions(updatedQuestions);
+  
+      alert('Question saved successfully!');
+    } catch (error) {
+      console.error('Error saving question:', error);
+      alert('Failed to save the question.');
+    }
+  };
+  
+
+  const handleDeleteClick = async (questionId: string | undefined) => {
+    if (!questionId) {
+      // If the question has no _id, it is unsaved; remove it locally
+      setQuestions(questions.filter((q) => q._id !== questionId));
+      return;
+    }
+  
+    try {
+      await deleteQuestion(questionId); // Backend call for saved questions
+      setQuestions(questions.filter((q) => q._id !== questionId)); // Remove from state
+      alert('Question deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting question:', error);
+      alert('Failed to delete question. Please try again.');
+    }
+  };
+  
+
+  // const renderPreview = (question: Question, index: number) => (
+  //   <div className="card mb-3">
+  //     <div className="card-header d-flex justify-content-between">
+  //       <h5>Question {index + 1}</h5>
+  //       <span>{question.points} pts</span>
+  //     </div>
+  //     <div className="card-body">
+  //       <h6>{question.title}</h6>
+  //       <p>{question.text}</p>
+  //       {question.type === 'multiple-choice' && (
+  //         <div className="list-group">
+  //           {question.options?.map((option) => (
+  //             <label
+  //               key={option}
+  //               className="list-group-item d-flex align-items-center"
+  //             >
+  //               <input
+  //                 type="radio"
+  //                 name={`question-${question._id}`}
+  //                 value={option}
+  //                 className="me-2"
+  //                 disabled
+  //               />
+  //               {option}
+  //             </label>
+  //           ))}
+  //         </div>
+  //       )}
+  //       {question.type === 'true-false' && (
+  //         <div className="list-group">
+  //           <label className="list-group-item d-flex align-items-center">
+  //             <input type="radio" value="true" className="me-2" disabled />
+  //             True
+  //           </label>
+  //           <label className="list-group-item d-flex align-items-center">
+  //             <input type="radio" value="false" className="me-2" disabled />
+  //             False
+  //           </label>
+  //         </div>
+  //       )}
+  //       {question.type === 'fill-in-the-blank' && (
+  //         <div className="mb-3">
+  //           <input type="text" className="form-control" disabled />
+  //         </div>
+  //       )}
+  //     </div>
+  //     <div className="card-footer d-flex justify-content-end">
+  //       <button
+  //         className="btn btn-secondary me-2"
+  //         onClick={() => handleEditClick(index)}
+  //       >
+  //         Edit
+  //       </button>
+  //       <button
+  //         className="btn btn-danger"
+  //         onClick={() => handleDeleteClick(question._id)}
+  //       >
+  //         Delete
+  //       </button>
+  //     </div>
+  //   </div>
+  // );
+
+  const renderPreview = (question: Question, index: number) => (
+    <div className="card mb-3">
+      <div className="card-header d-flex justify-content-between">
+        <h5>Question {index + 1}</h5>
+        <span>{question.points} pts</span>
+      </div>
+      <div className="card-body">
+        <h6>{question.title}</h6>
+        <p>{question.text}</p>
+        {question.type === 'multiple-choice' && (
+          <div className="list-group">
+            {question.options?.map((option) => (
+              <label
+                key={option}
+                className="list-group-item d-flex align-items-center"
+              >
+                <input
+                  type="radio"
+                  name={`question-${question._id}`}
+                  value={option}
+                  className="me-2"
+                  disabled
+                />
+                {option}
+              </label>
+            ))}
+          </div>
+        )}
+        {question.type === 'true-false' && (
+          <div className="list-group">
+            <label className="list-group-item d-flex align-items-center">
+              <input type="radio" value="true" className="me-2" disabled />
+              True
+            </label>
+            <label className="list-group-item d-flex align-items-center">
+              <input type="radio" value="false" className="me-2" disabled />
+              False
+            </label>
+          </div>
+        )}
+        {question.type === 'fill-in-the-blank' && (
+          <div className="mb-3">
+            <input type="text" className="form-control" disabled />
+          </div>
+        )}
+      </div>
+      <div className="card-footer d-flex justify-content-end">
+        <button
+          className="btn btn-secondary me-2"
+          onClick={() => handleEditClick(index)}
+        >
+          Edit
+        </button>
+        <button
+          className="btn btn-danger"
+          onClick={() => handleDeleteClick(question._id)}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+  
+
+  const editorHelper = (question: Question, index: number) => {
     const handleEditorChange = (updatedQuestion: Question) => {
       const updatedQuestions = [...questions];
       updatedQuestions[index] = updatedQuestion;
@@ -94,144 +337,22 @@ export default function QuestionEditor() {
         return <MCEditor question={question} onChange={handleEditorChange} />;
     }
   };
-
-  // TODO: 下面这些还需要补充完成才能传输数据
-  const handleSaveChanges = async (questionId: string) => {
-    try {
-      // Find the specific question by its _id
-      const questionToUpdate = questions.find((q) => q._id === questionId);
-  
-      if (!questionToUpdate) {
-        alert("Question not found");
-        return;
-      }
-  
-      // Update the question in the backend
-      
-  
-      // Optional: Refresh the questions list by re-fetching
-      const updatedQuestions = await updateQuestion(questionId, questionToUpdate); 
-      setQuestion(updatedQuestions);
-  
-      alert("Question updated successfully!");
-    } catch (error) {
-      console.error("Error updating question:", error);
-      alert("Failed to update question. Please try again.");
-    }
-  };
-
-
   
 
-//   const handleSaveQuiz = async () => {
-//     try {
-//         let savedQuiz;
-//         if (qid) {
-//             savedQuiz = await updateQuiz(quiz);
-//         } else {
-//             savedQuiz = await createQuiz(cid!);
-//         }
-
-//         const quizIdToUse = qid || savedQuiz._id;
-
-//         // Save or update each question
-//         for (const question of questions) {
-//             if (question._id) {
-//                 await updateQuestion(quizIdToUse, question._id, question);
-//             } else {
-//                 await createQuestion(quizIdToUse, question);
-//             }
-//         }
-
-//         alert('Quiz and questions saved successfully!');
-//     } catch (error) {
-//         console.error('Error saving quiz:', error);
-//         alert('Failed to save quiz');
-//     }
-// };
-
-const handleSaveQuiz = async () => {
-  console.log(qid !!!!!!!);
-    console.log(quiz?._id !!!!!!!!!!!!!!!!!!!!);
-    console.log("Saving quiz. Current quiz state:", quiz);
-  try {
-    if (!quiz) {
-      throw new Error("Quiz object is not initialized.");
-    }
-
-    let savedQuiz;
-    if (qid) {
-      // Check if the quiz has a valid `_id` before updating
-      if (!quiz._id) {
-        throw new Error("Quiz ID is missing.");
-      }
-      savedQuiz = await updateQuiz(quiz);
-    } else {
-      savedQuiz = await createQuiz(cid!);
-      setQuiz(savedQuiz); // Update state with the new quiz
-    }
-
-    const quizIdToUse = qid || savedQuiz._id;
-    if (!quizIdToUse) {
-      throw new Error("Quiz ID is missing after save.");
-    }
-
-    for (const question of questions) {
-      if (question._id) {
-        await updateQuestion(quizIdToUse,  question);
-      } else {
-        await createQuestion(quizIdToUse, question);
-      }
-    }
-
-    alert("Quiz and questions saved successfully!");
-  } catch (error) {
-    console.error("Error saving quiz:", error);
-    alert(`Failed to save quiz: ${error}`);
-  }
-};
-
-
-  const handleCancel = async () => {};
-
-
-  // const handleDeleteClick = async (questionId: string) => {};
-
-  const handleDeleteClick = async (questionId: string) => {
-    try {
-      if (questionId) {
-        await deleteQuestion(questionId);
-      }
-      setQuestions(questions.filter(question => question._id !== questionId));
-    } catch (error) {
-      console.error('Error in deleting the question:', error);
-      alert('Failed to delete question. Please try again.');
-    }
-  }
-
-
-
-  const handleAddQuestion = () => {
-    const newQuestion = {
-      title: 'New Question ',
-      type: 'MULTIPLE_CHOICE',
-      points: 0,
-      questionText: '',
-      choices: [{ text: '', isCorrect: false }],
+  const renderEditor = (question: Question, index: number) => {
+    const handleFieldChange = (field: keyof Question, value: any) => {
+      const updatedQuestions = [...questions];
+      updatedQuestions[index] = {
+        ...updatedQuestions[index],
+        [field]: value,
+      };
+      setQuestions(updatedQuestions);
     };
-    setQuestions([...questions, newQuestion]);
-  };
-
-  console.log("Quiz ID (qid):", qid); // Debug for quzi not found 
-  console.log("Course ID (cid):", cid);
-
-  return (
-    <div>
-      <h1>Quiz Question Editor</h1>
-      <hr />
-      {questions.map((question, index) => (
-        <div key={index} className='card mb-3'>
-          <div className='card-header d-flex align-items-center justify-content-between'>
+  
+    return (
+      <div className="card mb-3">
+        <div className="card-header">
+        <div className='card-header d-flex align-items-center justify-content-between'>
             <div className='me-2 flex-grow-1'>
               <input
                 type='text'
@@ -317,27 +438,63 @@ const handleSaveQuiz = async () => {
               </div>
             </div>
           </div>
-          <div className='card-body'>{renderEditor(question, index)}</div>
-          <div className='d-flex justify-content-start m-3'>
-            <button type='button' className='btn btn-secondary me-2'>
-              Cancel
+         <div className='card-body'>{editorHelper(question, index)}</div>
+        </div>
+        <div className="card-footer d-flex justify-content-between">
+          <div>
+            <button
+              className="btn btn-secondary me-2"
+              onClick={() => handleSaveChanges(index)}
+            >
+              Save
             </button>
             <button
-              type='button'
-              className='btn btn-danger'
-              onClick={() => handleSaveChanges(question._id)} 
+              className="btn btn-danger"
+              onClick={() => handleDeleteClick(question._id)}
             >
-              Update Question
+              Delete
             </button>
           </div>
         </div>
-      ))}
-      <div className='d-flex justify-content-center'>
-        <button
-          type='button'
-          className='btn btn-secondary me-2'
-          onClick={handleAddQuestion}
-        >
+      </div>
+    );
+  };
+  
+  // const renderEditor = (question: Question, index: number) => (
+  //   <div className="card mb-3">
+  //     <div className="card-body">
+  //       {question.type === 'multiple-choice' && (
+  //         <MCEditor
+  //           question={question}
+  //           onChange={(updatedQuestion) => {
+  //             const updatedQuestions = [...questions];
+  //             updatedQuestions[index] = updatedQuestion;
+  //             setQuestions(updatedQuestions);
+  //           }}
+  //         />
+  //       )}
+  //     </div>
+  //     <div className="card-footer d-flex justify-content-end">
+  //       <button
+  //         className="btn btn-secondary me-2"
+  //         onClick={() => handleSaveChanges(index)}
+  //       >
+  //         Save
+  //       </button>
+  //     </div>
+  //   </div>
+  // );
+
+  return (
+    <div>
+      <hr />
+      {questions.map((question, index) =>
+        question.isEditing
+          ? renderEditor(question, index)
+          : renderPreview(question, index)
+      )}
+      <div className="d-flex justify-content-center">
+        <button className="btn btn-secondary" onClick={handleAddQuestion}>
           + New Question
         </button>
       </div>
@@ -352,5 +509,3 @@ const handleSaveQuiz = async () => {
     </div>
   );
 }
-
-

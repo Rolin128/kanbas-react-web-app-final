@@ -138,7 +138,6 @@ export const updateQuestion = async (questionId: string, questionData: string) =
   return response.data;
 };
 
-
 // Delete a question
 export const deleteQuestion = async (questionId: string) => {
   const response = await axios.delete(`${QUESTIONS_API}/${questionId}`);
