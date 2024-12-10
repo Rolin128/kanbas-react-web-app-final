@@ -147,6 +147,11 @@ export default function QuestionEditor() {
     try {
       const questionToSave = questions[index];
 
+      if (!questionToSave.answers || questionToSave.answers.length === 0) {
+        alert('Answers are required before saving a question.');
+        return;
+      }
+  
       let savedQuestion;
       if (!questionToSave._id) {
         // Create a new question
@@ -186,69 +191,6 @@ export default function QuestionEditor() {
     }
   };
   
-
-  // const renderPreview = (question: Question, index: number) => (
-  //   <div className="card mb-3">
-  //     <div className="card-header d-flex justify-content-between">
-  //       <h5>Question {index + 1}</h5>
-  //       <span>{question.points} pts</span>
-  //     </div>
-  //     <div className="card-body">
-  //       <h6>{question.title}</h6>
-  //       <p>{question.text}</p>
-  //       {question.type === 'multiple-choice' && (
-  //         <div className="list-group">
-  //           {question.options?.map((option) => (
-  //             <label
-  //               key={option}
-  //               className="list-group-item d-flex align-items-center"
-  //             >
-  //               <input
-  //                 type="radio"
-  //                 name={`question-${question._id}`}
-  //                 value={option}
-  //                 className="me-2"
-  //                 disabled
-  //               />
-  //               {option}
-  //             </label>
-  //           ))}
-  //         </div>
-  //       )}
-  //       {question.type === 'true-false' && (
-  //         <div className="list-group">
-  //           <label className="list-group-item d-flex align-items-center">
-  //             <input type="radio" value="true" className="me-2" disabled />
-  //             True
-  //           </label>
-  //           <label className="list-group-item d-flex align-items-center">
-  //             <input type="radio" value="false" className="me-2" disabled />
-  //             False
-  //           </label>
-  //         </div>
-  //       )}
-  //       {question.type === 'fill-in-the-blank' && (
-  //         <div className="mb-3">
-  //           <input type="text" className="form-control" disabled />
-  //         </div>
-  //       )}
-  //     </div>
-  //     <div className="card-footer d-flex justify-content-end">
-  //       <button
-  //         className="btn btn-secondary me-2"
-  //         onClick={() => handleEditClick(index)}
-  //       >
-  //         Edit
-  //       </button>
-  //       <button
-  //         className="btn btn-danger"
-  //         onClick={() => handleDeleteClick(question._id)}
-  //       >
-  //         Delete
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
 
   const renderPreview = (question: Question, index: number) => (
     <div className="card mb-3">
@@ -459,31 +401,6 @@ export default function QuestionEditor() {
       </div>
     );
   };
-  
-  // const renderEditor = (question: Question, index: number) => (
-  //   <div className="card mb-3">
-  //     <div className="card-body">
-  //       {question.type === 'multiple-choice' && (
-  //         <MCEditor
-  //           question={question}
-  //           onChange={(updatedQuestion) => {
-  //             const updatedQuestions = [...questions];
-  //             updatedQuestions[index] = updatedQuestion;
-  //             setQuestions(updatedQuestions);
-  //           }}
-  //         />
-  //       )}
-  //     </div>
-  //     <div className="card-footer d-flex justify-content-end">
-  //       <button
-  //         className="btn btn-secondary me-2"
-  //         onClick={() => handleSaveChanges(index)}
-  //       >
-  //         Save
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
   
   return (
     <div>
