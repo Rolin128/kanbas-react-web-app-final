@@ -120,6 +120,9 @@ export default function QuestionEditor() {
     }
   };
 
+
+  
+
 //   const handleSaveQuiz = async () => {
 //     try {
 //         let savedQuiz;

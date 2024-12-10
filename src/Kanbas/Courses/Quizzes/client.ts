@@ -130,16 +130,14 @@ export const createQuestion = async (quizId: string, question: any) => {
   return response.data;
 };
 
-// Update an existing question
-export const updateQuestion = async (questionId: string, questionData: any) => {
-  try {
-      const response = await axios.put(`${QUESTIONS_API}/${questionId}`, questionData);
-      return response.data;
-  } catch (error) {
-    console.error("Failed to update question:", error);
-    throw error;
-  }
+
+export const updateQuestion = async (questionId: string, questionData: string) => {
+  console.log("Payload sent to backend:", questionData); // Debug payload
+  const response = await axios.put(`${QUESTIONS_API}/${questionId}`, questionData);
+  console.log("Response from backend:", response.data); // Debug backend response
+  return response.data;
 };
+
 
 // Delete a question
 export const deleteQuestion = async (questionId: string) => {
