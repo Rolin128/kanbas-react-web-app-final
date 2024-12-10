@@ -163,7 +163,8 @@ export default function QuestionEditor() {
   
       // Update the question in the state with the saved version and exit editing mode
       const updatedQuestions = [...questions];
-      updatedQuestions[index] = { ...savedQuestion, isEditing: false };
+     // updatedQuestions[index] = { ...savedQuestion, isEditing: false };
+      updatedQuestions[index] = { ...questions[index], ...savedQuestion, isEditing: false };
       setQuestions(updatedQuestions);
   
       alert('Question saved successfully!');
@@ -200,6 +201,7 @@ export default function QuestionEditor() {
       </div>
       <div className="card-body">
         <h6>{question.title}</h6>
+       
         <p>{question.text}</p>
         {question.type === 'multiple-choice' && (
           <div className="list-group">
@@ -406,10 +408,12 @@ export default function QuestionEditor() {
     <div>
       <hr />
       {questions.map((question, index) =>
-        question.isEditing
-          ? renderEditor(question, index)
-          : renderPreview(question, index)
-      )}
+  question.isEditing
+    ? renderEditor(question, index)
+    : renderPreview(question, index)
+)}
+
+
       <div className="d-flex justify-content-center">
         <button className="btn btn-secondary" onClick={handleAddQuestion}>
           + New Question
