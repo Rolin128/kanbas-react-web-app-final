@@ -32,6 +32,13 @@ export default function QuestionEditor() {
   const { qid } = useParams<{ qid: string }>();
   const [questions, setQuestions] = useState<any[]>([]);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [originalQuestions, setOriginalQuestions] = useState<any[]>([]); // For reverting edits
+
+   // Calculate total points dynamically
+   const totalPoints = questions.reduce(
+    (sum, question) => sum + (question.points || 0),
+    0
+  );
 
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -110,11 +117,19 @@ export default function QuestionEditor() {
   
     const handleCancel = async () => {};
 
+    const handleCancelEdit = (index: number) => {
+      // Revert to the original state and dismiss the editor
+      const revertedQuestions = [...originalQuestions];
+      revertedQuestions[index].isEditing = false; // Exit edit mode
+      setQuestions(revertedQuestions);
+    };
+
   
 
   const handleEditClick = (index: number) => {
     const updatedQuestions = [...questions];
     updatedQuestions[index].isEditing = true;
+    setOriginalQuestions([...questions]); // Save the original state
     setQuestions(updatedQuestions);
   };
 
@@ -193,6 +208,71 @@ export default function QuestionEditor() {
   };
   
 
+  // const renderPreview = (question: Question, index: number) => (
+  //   <div className="card mb-3">
+  //     <div className="card-header d-flex justify-content-between">
+  //       <h5>Question {index + 1}</h5>
+  //       <span>{question.points} pts</span>
+  //     </div>
+  //     <div className="card-body">
+  //       <h6>{question.title}</h6>
+       
+  //       <p>{question.text}</p>
+  //       {question.type === 'multiple-choice' && (
+  //         <div className="list-group">
+  //           {question.options?.map((option) => (
+  //             <label
+  //               key={option}
+  //               className="list-group-item d-flex align-items-center"
+  //             >
+  //               <input
+  //                 type="radio"
+  //                 name={`question-${question._id}`}
+  //                 value={option}
+  //                 className="me-2"
+  //                 disabled
+  //               />
+  //               {option}
+  //             </label>
+  //           ))}
+  //         </div>
+  //       )}
+  //       {question.type === 'true-false' && (
+  //         <div className="list-group">
+  //           <label className="list-group-item d-flex align-items-center">
+  //             <input type="radio" value="true" className="me-2" disabled />
+  //             True
+  //           </label>
+  //           <label className="list-group-item d-flex align-items-center">
+  //             <input type="radio" value="false" className="me-2" disabled />
+  //             False
+  //           </label>
+  //         </div>
+  //       )}
+  //       {question.type === 'fill-in-the-blank' && (
+  //         <div className="mb-3">
+  //           <input type="text" className="form-control" disabled />
+  //         </div>
+  //       )}
+  //     </div>
+  //     <div className="card-footer d-flex justify-content-end">
+  //       <button
+  //         className="btn btn-secondary me-2"
+  //         onClick={() => handleEditClick(index)}
+  //       >
+  //         Edit
+  //       </button>
+  //       <button
+  //         className="btn btn-danger"
+  //         onClick={() => handleDeleteClick(question._id)}
+  //       >
+  //         Delete
+  //       </button>
+  //     </div>
+  //   </div>
+  // );
+  
+
   const renderPreview = (question: Question, index: number) => (
     <div className="card mb-3">
       <div className="card-header d-flex justify-content-between">
@@ -200,45 +280,8 @@ export default function QuestionEditor() {
         <span>{question.points} pts</span>
       </div>
       <div className="card-body">
+        {/* Only display the title */}
         <h6>{question.title}</h6>
-       
-        <p>{question.text}</p>
-        {question.type === 'multiple-choice' && (
-          <div className="list-group">
-            {question.options?.map((option) => (
-              <label
-                key={option}
-                className="list-group-item d-flex align-items-center"
-              >
-                <input
-                  type="radio"
-                  name={`question-${question._id}`}
-                  value={option}
-                  className="me-2"
-                  disabled
-                />
-                {option}
-              </label>
-            ))}
-          </div>
-        )}
-        {question.type === 'true-false' && (
-          <div className="list-group">
-            <label className="list-group-item d-flex align-items-center">
-              <input type="radio" value="true" className="me-2" disabled />
-              True
-            </label>
-            <label className="list-group-item d-flex align-items-center">
-              <input type="radio" value="false" className="me-2" disabled />
-              False
-            </label>
-          </div>
-        )}
-        {question.type === 'fill-in-the-blank' && (
-          <div className="mb-3">
-            <input type="text" className="form-control" disabled />
-          </div>
-        )}
       </div>
       <div className="card-footer d-flex justify-content-end">
         <button
@@ -384,49 +427,58 @@ export default function QuestionEditor() {
           </div>
          <div className='card-body'>{editorHelper(question, index)}</div>
         </div>
-        <div className="card-footer d-flex justify-content-between">
-          <div>
-            <button
-              className="btn btn-secondary me-2"
-              onClick={() => handleSaveChanges(index)}
-            >
-              Save
-            </button>
-            <button
-              className="btn btn-danger"
-              onClick={() => handleDeleteClick(question._id)}
-            >
-              Delete
-            </button>
-          </div>
+        <div className="card-footer d-flex justify-content-start">
+  <button
+    className="btn btn-secondary me-2"
+    onClick={() => handleSaveChanges(index)}
+  >
+    Save
+  </button>
+  <button
+    className="btn btn-danger me-2"
+    onClick={() => handleDeleteClick(question._id)}
+  >
+    Delete
+  </button>
+  <button
+    className="btn btn-light"
+    onClick={() => handleCancelEdit(index)}
+  >
+    Cancel
+  </button>
+</div>
+
         </div>
-      </div>
+
     );
   };
   
   return (
     <div>
-      <hr />
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h3>Quiz Questions</h3>
+        <h5>Total Points: {totalPoints}</h5>
+      </div>
       {questions.map((question, index) =>
-  question.isEditing
-    ? renderEditor(question, index)
-    : renderPreview(question, index)
-)}
-
-
+        question.isEditing
+          ? renderEditor(question, index)
+          : renderPreview(question, index)
+      )}
       <div className="d-flex justify-content-center">
         <button className="btn btn-secondary" onClick={handleAddQuestion}>
           + New Question
         </button>
       </div>
-      <div className='d-flex justify-content-end mt-3'>
-        <button className='btn btn-secondary me-2' onClick={handleCancel}>
+      <div className="d-flex justify-content-end mt-3">
+        <button className="btn btn-secondary me-2" onClick={() => {}}>
           Cancel
         </button>
-        <button className='btn btn-danger' onClick={handleSaveQuiz}>
+        <button className="btn btn-danger" onClick={handleSaveQuiz}>
           Save
         </button>
       </div>
     </div>
   );
 }
+
+
