@@ -156,8 +156,7 @@ export default function QuizDetails() {
             <Link
               id="wd-preview-btn"
               className="btn btn-lg btn-secondary me-1 text-center"
-              // TODO:  填入preview的route
-              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}/details`}
+              to={`/Kanbas/Courses/${cid}/Quizzes/${qid}/preview`}
             >
               Preview
             </Link>
