@@ -146,7 +146,7 @@ export default function QuestionEditor() {
   const handleSaveChanges = async (index: number) => {
     try {
       const questionToSave = questions[index];
-  
+
       let savedQuestion;
       if (!questionToSave._id) {
         // Create a new question
@@ -484,7 +484,7 @@ export default function QuestionEditor() {
   //     </div>
   //   </div>
   // );
-
+  
   return (
     <div>
       <hr />
