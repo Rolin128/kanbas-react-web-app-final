@@ -9,6 +9,11 @@ export const findAllQuestionsByQuizId = async (quizId: string) => {
   return response.data;
 };
 
+export const findAllQuestionsByQuizIdNoPtsMapping = async (quizId: string) => {
+  const response = await axios.get(`${QUIZZES_API}/${quizId}/questions/takequiz`);
+  return response.data;
+};
+
 export const createQuestion = async (quizId: string, question: any) => {
   const response = await axios.post(`${QUIZZES_API}/${quizId}/questions`, question);
   return response.data;
