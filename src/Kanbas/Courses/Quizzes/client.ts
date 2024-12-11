@@ -5,7 +5,6 @@ const QUIZZES_API = `${REMOTE_SERVER}/api/quizzes`;
 const COURSES_API = `${REMOTE_SERVER}/api/courses`;
 const QUESTIONS_API = `${REMOTE_SERVER}/api/questions`;
 
-
 // Update an existing quiz
 export const updateQuiz = async (quiz: any) => {
   const { data } = await axiosWithCredentials.put(`${QUIZZES_API}/${quiz._id}`, quiz);
@@ -19,7 +18,7 @@ export const deleteQuiz = async (quizId: string) => {
 
 // Fetch a quiz by its ID
 export const findQuizById = async (quizId: string) => {
-  const response = await axios.get(`${QUIZZES_API}/${quizId}`);
+  const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}`);
   return response.data;
 };
 
@@ -38,7 +37,6 @@ export const createQuestion = async (quizId: string, question: any) => {
   const response = await axios.post(`${QUIZZES_API}/${quizId}/questions`, question);
   return response.data;
 };
-
 
 export const updateQuestion = async (questionId: string, questionData: string) => {
   console.log("Payload sent to backend:", questionData); // Debug payload
@@ -59,5 +57,8 @@ export const findAllQuestionsByQuizId = async (quizId: string) => {
   return response.data;
 };
 
-
-
+// Attempt a quiz
+export const submitAttempt = async (quizId: any, attempt: any) => {
+  const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/submitAnswers`, attempt);
+  return response.data;
+};
