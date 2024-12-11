@@ -23,6 +23,12 @@ interface Answers {
   [key: string]: string;
 }
 
+// interface Quiz {
+//   title: string;
+//   multipleAttempts: boolean;
+//   maxAttempts: number;
+//   attemptsLeft: number;
+// }
 interface Quiz {
   title: string;
   multipleAttempts: boolean;
@@ -54,7 +60,7 @@ export default function QuizPreview() {
 
   const fetchQuestions = async () => {
     try {
-      const fetchedQuestions = await questionClient.findAllQuestionsByQuizId(qid as string);
+      const fetchedQuestions = await questionClient.findAllQuestionsByQuizIdNoPtsMapping(qid as string);
       const questionsWithOptions = fetchedQuestions.map((question: Question) => {
         if (question.questionType === "true-false" && (!question.options || question.options.length === 0)) {
           return { ...question, options: ["True", "False"] };
@@ -82,6 +88,28 @@ export default function QuizPreview() {
       console.error("Error fetching quiz details:", error);
     }
   };
+
+  // const fetchQuizDetails = async () => {
+  //   try {
+  //     const fetchedQuizDetails = await quizClient.findQuiz(cid as string, qid as string);
+  //     setQuizDetails(fetchedQuizDetails);
+  //     if (fetchedQuizDetails.multipleAttempts) {
+  //       // TODO: ???
+  //       // const savedAttemptsLeft: string | null = localStorage.getItem(`quiz-${qid}-attemptsLeft`);
+  //       // const savedAttemptsLeftInt: number = parseInt(savedAttemptsLeft || "0");
+  //       // const validAttemptsLeft = savedAttemptsLeftInt > 0 ? savedAttemptsLeftInt : 0;
+  //       // console.log("savedAttemptsLeft int " + validAttemptsLeft);
+  //       // const attemptsLeft = fetchedQuizDetails.attemptsLeft;
+  //       // UNTIL HERE
+  //       setAttemptsLeft(fetchedQuizDetails.attempts);
+  //     } else {
+  //       setAttemptsLeft(1);
+  //       // localStorage.setItem(`quiz-${qid}-attemptsLeft`, "1");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching quiz details:", error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchQuestions();
@@ -116,6 +144,7 @@ export default function QuizPreview() {
     console.log(">>>", questions);
 
     questions.forEach((question: Question) => {
+      console.log(">>>>question points:" + question.points);
       if (answers[question._id] === question.answers[0]) {
         newScore += question.points;
       } else {
@@ -172,6 +201,22 @@ export default function QuizPreview() {
       setHighestScoreAnswers(answers);
     }
 
+    // if (quizDetails?.multipleAttempts) {
+    //   // setAttemptsLeft((prev) => {
+    //   //   const newAttemptsLeft = prev !== null ? prev - 1 : null;
+    //   //   localStorage.setItem(`quiz-${qid}-attemptsLeft`, newAttemptsLeft?.toString() || "0");
+    //   //   return newAttemptsLeft;
+    //   // });
+    //   const newAttemptsLeft = quizDetails.attemptsLeft - 1;
+    //   setAttemptsLeft(newAttemptsLeft);
+    //   const updatedQuiz = {
+    //     ...quizDetails,
+    //     attemptsLeft: newAttemptsLeft, // Decremented attemptsLeft
+    //   };
+    //   await quizClient.updateQuiz(updatedQuiz);
+    // } else {
+    //   setAttemptsLeft(0);
+    // }
     if (quizDetails?.multipleAttempts) {
       setAttemptsLeft((prev) => {
         const newAttemptsLeft = prev !== null ? prev - 1 : null;
@@ -226,6 +271,19 @@ export default function QuizPreview() {
   const percentageScore = score !== null ? (score / totalPoints) * 100 : 0;
   const scoreComment = getScoreComment(percentageScore);
 
+  // useEffect(() => {
+  //   if (quizDetails) {
+  //     if (!quizDetails.multipleAttempts) {
+  //       setAttemptsLeft(1);
+  //       setSubmitCount(0);
+  //       // localStorage.setItem(`quiz-${qid}-attemptsLeft`, "1");
+  //     } else {
+  //       // const savedAttemptsLeft = localStorage.getItem(`quiz-${qid}-attemptsLeft`);
+  //       // setAttemptsLeft(savedAttemptsLeft ? parseInt(savedAttemptsLeft) : quizDetails.attempts);
+  //       setAttemptsLeft(quizDetails.attemptsLeft);
+  //     }
+  //   }
+  // }, [quizDetails?.multipleAttempts]);
   useEffect(() => {
     if (quizDetails) {
       if (!quizDetails.multipleAttempts) {
@@ -235,6 +293,9 @@ export default function QuizPreview() {
       } else {
         const savedAttemptsLeft = localStorage.getItem(`quiz-${qid}-attemptsLeft`);
         setAttemptsLeft(savedAttemptsLeft ? parseInt(savedAttemptsLeft) : quizDetails.attempts);
+        console.log("savedAttemptsLeft: " + savedAttemptsLeft);
+        // localStorage.setItem(`quiz-${qid}-attemptsLeft`, quizDetails.attempts.toString());
+        // setAttemptsLeft(quizDetails.attempts);
       }
     }
   }, [quizDetails?.multipleAttempts]);

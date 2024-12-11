@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { AiOutlineStop } from "react-icons/ai";
 import { FaPlus, FaArrowLeft } from "react-icons/fa6";
+import { findAllQuestionsByQuizId } from "../QuestionClient";
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -26,9 +27,9 @@ export default function QuizDetails() {
         const quiz = await client.findQuiz(cid as string, qid as string);
         console.log(">>>>>Fetched quiz:", quiz); // Debug log
         dispatch(setQuizzes([quiz]));
-        // const questions = await findAllQuestionsByQuizId(qid as string);
-        // const points = questions.reduce((total: Number, question: any) => total + (question.points || 0), 0);
-        // setTotalPoints(points);
+        const questions = await findAllQuestionsByQuizId(qid as string);
+        const points = questions.reduce((total: Number, question: any) => total + (question.points || 0), 0);
+        setTotalPoints(points);
       }
     } catch (err: any) {
       setError(err.message);
@@ -37,17 +38,17 @@ export default function QuizDetails() {
     }
   };
 
-  // const togglePublish = async () => {
-  //   if (!quiz) return;
+  const togglePublish = async () => {
+    if (!quiz) return;
 
-  //   const updatedQuiz = { ...quiz, published: !quiz.published };
-  //   try {
-  //     await client.updateQuiz(updatedQuiz);
-  //     dispatch(setQuizzes([updatedQuiz]));
-  //   } catch (err: any) {
-  //     setError(err.message);
-  //   }
-  // };
+    const updatedQuiz = { ...quiz, published: !quiz.published };
+    try {
+      await client.updateQuiz(updatedQuiz);
+      dispatch(setQuizzes([updatedQuiz]));
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
 
   useEffect(() => {
     fetchQuiz();
@@ -67,7 +68,7 @@ export default function QuizDetails() {
   // };
 
   const formatDate = (dateString: string) => {
-    console.log(">>>>dateString: " + dateString);
+    // console.log(">>>>dateString: " + dateString);
     try {
       const date = new Date(dateString);
       return format(date, "MMM d 'at' h a");
@@ -77,21 +78,25 @@ export default function QuizDetails() {
     }
   };
 
-  // console.log("Quiz from state:", quiz); // Debug log
+  console.log("Quiz from state:", quiz); // Debug log
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   console.log("USER " + currentUser.role);
 
-  // const handleTakeQuiz = () => {
-  //   setShowAccessCodeForm(true);
-  // };
+  const handleTakeQuiz = () => {
+    if (quiz.accessCode == undefined) {
+      handleAccessCodeSubmit();
+    } else {
+      setShowAccessCodeForm(true);
+    }
+  };
 
-  // const handleAccessCodeSubmit = () => {
-  //   if (enteredCode === quiz.accessCode) {
-  //     navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/questions`);
-  //   } else {
-  //     setAccessCodeError("Invalid access code. Please try again.");
-  //   }
-  // };
+  const handleAccessCodeSubmit = () => {
+    if (quiz.accessCode == undefined || enteredCode === quiz.accessCode) {
+      navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/preview`);
+    } else {
+      setAccessCodeError("Invalid access code. Please try again.");
+    }
+  };
 
   if (loading) {
     return <div>Loading...</div>;
@@ -117,8 +122,7 @@ export default function QuizDetails() {
       <div id="wd-quiz-control-buttons" className="text-nowrap align-self-center">
         {currentUser.role === "STUDENT" ? (
           <>
-            <button id="wd-take-quiz-btn" className="btn btn-lg btn-primary me-1 text-center">
-              {/* onClick={handleTakeQuiz}> */}
+            <button id="wd-take-quiz-btn" className="btn btn-lg btn-primary me-1 text-center" onClick={handleTakeQuiz}>
               Take Quiz
             </button>
             {showAccessCodeForm && (
@@ -136,8 +140,7 @@ export default function QuizDetails() {
                       />
                       {accessCodeError && <div className="invalid-feedback">{accessCodeError}</div>}
                     </div>
-                    <button type="button" className="btn btn-primary">
-                      {/* onClick={handleAccessCodeSubmit}> */}
+                    <button type="button" className="btn btn-primary" onClick={handleAccessCodeSubmit}>
                       Submit
                     </button>
                   </form>
@@ -147,9 +150,11 @@ export default function QuizDetails() {
           </>
         ) : (
           <>
-            <button id="wd-publish-btn" className={`btn btn-lg me-1 ${quiz.published ? "btn-success" : "btn-danger"}`}>
-              {/* onClick={togglePublish} */}
-              {/* > */}
+            <button
+              id="wd-publish-btn"
+              className={`btn btn-lg me-1 ${quiz.published ? "btn-success" : "btn-danger"}`}
+              onClick={togglePublish}
+            >
               {quiz.published ? <FaPlus /> : <AiOutlineStop />}
               {quiz.published ? " Published" : " Unpublished"}
             </button>
