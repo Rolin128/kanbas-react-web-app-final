@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import * as questionClient from "./QuestionClient";
-import * as answerClient from "./AnswerClient";
 import * as quizClient from "./client";
 import { setQuestions as setQuestionsAction } from "./QuestionsReducer";
 import { addAnswer, updateAnswer } from "./AnswerReducer";
@@ -46,6 +45,7 @@ export default function QuizPreview() {
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [quizDetails, setQuizDetails] = useState<Quiz | null>(null);
   const [submitCount, setSubmitCount] = useState<number>(0);
+  const [submitted, setSubmitted] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(660);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [scores, setScores] = useState<number[]>([]);
@@ -78,7 +78,10 @@ export default function QuizPreview() {
     try {
       const fetchedQuizDetails = await quizClient.findQuiz(cid as string, qid as string);
       setQuizDetails(fetchedQuizDetails);
-      const attemptsTaken = fetchedQuizDetails.attemptHistory ? fetchedQuizDetails.attemptHistory.attemptsTaken : 0;
+      let attemptsTaken = fetchedQuizDetails.attemptHistory ? fetchedQuizDetails.attemptHistory.attemptsTaken : 0;
+      if (attemptsTaken > fetchedQuizDetails.maxAttempts) {
+        attemptsTaken = fetchedQuizDetails.maxAttempts;
+      }
       const savedAttemptsLeft = fetchedQuizDetails.maxAttempts - attemptsTaken;
       setAttemptsLeft(savedAttemptsLeft);
       setSubmitCount(attemptsTaken);
@@ -107,7 +110,10 @@ export default function QuizPreview() {
       setTimer(timerInterval);
       return () => clearInterval(timerInterval);
     } else {
-      handleSubmit();
+      if (!submitted) {
+        // timeout and click button both triggers handleSubmit(). use boolean "submitted" to ensure only one submission.
+        handleSubmit();
+      }
     }
   }, [timeLeft]);
 
@@ -148,31 +154,6 @@ export default function QuizPreview() {
       answerDataArray.push(answerData);
     });
 
-    try {
-      for (const answerData of answerDataArray) {
-        try {
-          const existingAnswer = await answerClient.fetchAnswer(answerData.userId, answerData.questionId);
-          if (existingAnswer) {
-            console.log("Updating answers: " + answerData);
-            await answerClient.updateAnswer(answerData, answerData.questionId, currentUser._id);
-            dispatch(updateAnswer(answerData));
-          } else {
-            await answerClient.createAnswer(answerData.questionId as string, answerData as any);
-            dispatch(addAnswer(answerData));
-          }
-        } catch (error: any) {
-          if (error.response && error.response.status === 404) {
-            await answerClient.createAnswer(answerData.questionId as string, answerData as any);
-            dispatch(addAnswer(answerData));
-          } else {
-            console.error("Error processing answer:", error);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error storing answers:", error);
-    }
-
     setScore(newScore);
     setScores([...scores, newScore]);
     setIncorrectQuestions(incorrect);
@@ -195,7 +176,13 @@ export default function QuizPreview() {
     // }
 
     // setSubmitCount((prevCount) => prevCount + 1);
-    await quizClient.submitAttempt(qid, { lastAttemptScore: newScore, lastAttemptAnswers: answers });
+    if (!submitted) {
+      // timeout and click button both triggers handleSubmit(). use boolean "submitted" to ensure only one submission.
+      await quizClient.submitAttempt(qid, { lastAttemptScore: newScore, lastAttemptAnswers: answers });
+    }
+    // Call fetch details again, to accurately set submitCount and attemptsLeft.
+    await fetchQuizDetails();
+    setSubmitted(true);
     console.log("Quiz submitted successfully:", answers, "Score:", newScore);
 
     if (timer) {
@@ -282,7 +269,7 @@ export default function QuizPreview() {
         </div>
       )}
       {quizDetails?.multipleAttempts ? (
-        attemptsLeft !== null && attemptsLeft > 0 ? (
+        attemptsLeft === null || attemptsLeft > 0 ? (
           <div className="alert alert-warning" role="alert">
             This quiz allows multiple attempts. Attempts left: {attemptsLeft}
           </div>
@@ -372,25 +359,28 @@ export default function QuizPreview() {
           </div>
         </div>
       ))}
-      <div className="d-flex justify-content-between mt-3">
-        {currentUser?.role !== "STUDENT" && (
-          <button onClick={handleEditQuiz} className="btn btn-secondary">
-            Keep Editing This Quiz
-          </button>
-        )}
-        {submitCount >= (quizDetails?.multipleAttempts ? quizDetails.attempts : 1) ? (
-          <button className="btn btn-danger view-results-btn" onClick={handleViewResults}>
-            View Results
-          </button>
-        ) : (quizDetails?.multipleAttempts ? submitCount < quizDetails.attempts : submitCount < 1) && timeLeft > 0 ? (
-          <button onClick={handleSubmit} className="btn btn-primary">
-            Submit Quiz
-          </button>
-        ) : (
-          <button onClick={handleRetakeQuiz} className="btn btn-warning" disabled>
-            You Can't Retake Quiz (Attempts left: 0)
-          </button>
-        )}
+      <div className="row my-3" style={{ textAlign: "right" }}>
+        <div className="clearfix">
+          {currentUser?.role !== "STUDENT" && (
+            <button onClick={handleEditQuiz} className="btn btn-secondary">
+              Keep Editing This Quiz
+            </button>
+          )}
+          {submitCount > 0 && (
+            <button className="btn btn-danger view-results-btn float-end m-1" onClick={handleViewResults}>
+              View Results
+            </button>
+          )}
+          {(attemptsLeft === null || attemptsLeft > 0) && timeLeft > 0 ? (
+            <button onClick={handleSubmit} className="btn btn-primary float-end m-1">
+              Submit Quiz
+            </button>
+          ) : (
+            <button onClick={handleRetakeQuiz} className="btn btn-warning float-end m-1" disabled>
+              You Can't Retake Quiz (Attempts left: 0)
+            </button>
+          )}
+        </div>
       </div>
       {submitCount >= (quizDetails?.multipleAttempts ? quizDetails.attempts : 1) && (
         <>
