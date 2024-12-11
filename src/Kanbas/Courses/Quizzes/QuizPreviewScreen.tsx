@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import * as questionClient from "./QuestionClient";
-import * as answerClient from "./AnswerClient";
 import * as quizClient from "./client";
 import { setQuestions as setQuestionsAction } from "./QuestionsReducer";
 import { addAnswer, updateAnswer } from "./AnswerReducer";
@@ -154,31 +153,6 @@ export default function QuizPreview() {
 
       answerDataArray.push(answerData);
     });
-
-    try {
-      for (const answerData of answerDataArray) {
-        try {
-          const existingAnswer = await answerClient.fetchAnswer(answerData.userId, answerData.questionId);
-          if (existingAnswer) {
-            console.log("Updating answers: " + answerData);
-            await answerClient.updateAnswer(answerData, answerData.questionId, currentUser._id);
-            dispatch(updateAnswer(answerData));
-          } else {
-            await answerClient.createAnswer(answerData.questionId as string, answerData as any);
-            dispatch(addAnswer(answerData));
-          }
-        } catch (error: any) {
-          if (error.response && error.response.status === 404) {
-            await answerClient.createAnswer(answerData.questionId as string, answerData as any);
-            dispatch(addAnswer(answerData));
-          } else {
-            console.error("Error processing answer:", error);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error storing answers:", error);
-    }
 
     setScore(newScore);
     setScores([...scores, newScore]);

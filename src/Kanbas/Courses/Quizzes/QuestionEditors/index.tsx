@@ -7,7 +7,6 @@ import TFEditor from "./TrueFalseEditor";
 import { FaTrash } from "react-icons/fa";
 import { Navigate } from "react-router-dom";
 
-
 import { setQuestions, addQuestion, editQuestion } from "./reducer";
 import {
   findQuizById,
@@ -104,7 +103,7 @@ export default function QuestionEditor() {
 
       for (const question of questions) {
         if (question._id) {
-          await updateQuestion(quizIdToUse, question);
+          await updateQuestion(question._id, question);
         } else {
           await createQuestion(quizIdToUse, question);
         }
@@ -184,7 +183,7 @@ export default function QuestionEditor() {
         savedQuestion = await createQuestion(qid!, questionToSave);
       } else {
         // Update existing question
-        savedQuestion = await updateQuestion(qid!, questionToSave);
+        savedQuestion = await updateQuestion(questionToSave._id!, questionToSave);
       }
 
       // Update the question in the state with the saved version and exit editing mode
