@@ -9,6 +9,7 @@ import { setQuizzes, addQuiz, deleteQuiz, updateQuiz } from "./reducer";
 import * as coursesClient from "../client";
 import * as quizzesClient from "./client";
 import { format } from "date-fns";
+import { FaBan } from "react-icons/fa";
 
 import "./SearchBar.css";
 import "./Elips.css";
@@ -28,18 +29,13 @@ export default function Quizzes() {
     const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
     dispatch(setQuizzes(quizzes));
   };
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+
   useEffect(() => {
     fetchQuizzes();
   }, []);
-  // const createQuizForCourse = async (quiz: any) => {
-  //     if (!cid) return;
-  //     const newQuiz = await coursesClient.createQuizForCourse(cid as string, quiz);
-  //     dispatch(addQuiz(newQuiz));
-  // };
 
-  // const handleCreate = () => {
-  //     createQuizForCourse();
-  // }
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const handleEditQuiz = (quizId: string) => {
     navigate(`/Kanbas/Courses/${cid}/Quizzes/${quizId}`);
@@ -87,28 +83,75 @@ export default function Quizzes() {
       return dateString;
     }
   };
+  const togglePublish = async (quiz: any) => {
+    const newQuiz = { ...quiz, published: !quiz.published };
+    await quizzesClient.updateQuiz(newQuiz);
+    dispatch(updateQuiz(newQuiz));
+    navigate(0);
+
+  };
+
+  const createQuiz = async (quiz: any) => {
+    if (!cid) return;
+    const newQuiz = await coursesClient.createQuizForCourse(cid as string, quiz);
+    dispatch(addQuiz(newQuiz));
+    navigate(`/Kanbas/Courses/${cid}/quizzes/${newQuiz._id}`);
+  };
+
+  const handleCreateQuizClick = () => {
+    const quiz = {
+      course: cid,
+      title: "Default",
+      description: "",
+      published: false,
+      shuffleAnswers: true,
+      timeLimit: 20,
+      multipleAttempts: false,
+      lockScreen: false,
+      oneQuestion: true,
+      showCorrectAnswers: true,
+      webcamRequired: true,
+      accessCode: "",
+      points: 100,
+      due: "",
+      available: "",
+      until: "",
+      _id: "",
+    };
+    // 创建新的 quiz
+    createQuiz({ ...quiz, _id: new Date().getTime().toString() });
+  };
+
 
   return (
     <div id="wd-quizzes">
       <div>
-        <div className="mt-4 mb-4">
-          <div className="text-nowrap">
-            <div className="d-flex justify-content-end align-items-center">
-              <div className="search-bar">
-                <FaSearch className="search-icon" />
-                <input className="search-input" type="text" placeholder="Search..." />
-              </div>
-              <Link className="btn btn-lg btn-danger me-1 float-end" to={`/Kanbas/Courses/${cid}/Quizzes/addNewQuiz`}>
-                <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-                Quiz
-              </Link>
+        {currentUser.role === 'FACULTY' && (
+          <>
+            <div className="mt-4 mb-4">
+              <div className="text-nowrap">
+                <div className="d-flex justify-content-end align-items-center">
+                  <div className="search-bar">
+                    <FaSearch className="search-icon" />
+                    <input className="search-input" type="text" placeholder="Search..." />
+                  </div>
+                  <button
+                    className="btn btn-lg btn-danger me-1 float-end"
+                    onClick={handleCreateQuizClick}
+                  >
+                    <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+                    Quiz
+                  </button>
 
-              <button className="ev-btn btn-lg me-1 float-end">
-                <IoEllipsisVertical className="position-relative" />
-              </button>
+                  <button className="ev-btn btn-lg me-1 float-end">
+                    <IoEllipsisVertical className="position-relative" />
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
+
         <hr className="mb-4" />
         <ul id="wd-quizzes-content" className="list-group rounded-0">
           <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
@@ -120,7 +163,7 @@ export default function Quizzes() {
               </div>
             </div>
             <ul className="wd-lessons list-group rounded-0">
-              {quizzes.map((quiz: any) => (
+              {(currentUser.role === "FACULTY" ? quizzes : quizzes.filter((quiz: any) => quiz.published)).map((quiz: any) => (
                 <li key={quiz._id} className="wd-lesson list-group-item p-3 ps-1">
                   <div className="d-flex justify-content-between align-items-center">
                     <div className="d-flex align-items-center">
@@ -141,43 +184,36 @@ export default function Quizzes() {
                         </div>
                       </div>
                     </div>
-                    <div className="float-end">
-                      <GreenCheckmark />
-                      {/* 单个作业最左端的三个竖着省略号按钮 */}
-                      <button
-                        className="btn btn-link me-1 float-end"
-                        onClick={() => setActiveMenu(activeMenu === quiz._id ? null : quiz._id)}
-                      >
-                        <IoEllipsisVertical className="fs-5 text-dark" />
-                      </button>
-                      {activeMenu === quiz._id && (
-                        <div className="dropdown-menu show position-absolute" style={{ right: 0 }}>
-                          <button className="dropdown-item" onClick={() => handleEditQuiz(quiz._id)}>
-                            Edit
-                          </button>
-                          <button className="dropdown-item" onClick={() => removeQuiz(quiz._id)}>
-                            Delete
-                          </button>
-                          <button className="dropdown-item">
-                            {quiz.published ? "Publish" : "Unpublish"}
-                            {/* 
-                                                    <button className="btn btn-lg btn-warning" onClick={handleTogglePublish}>
-                                            {quiz.published ? 'Unpublish' : 'Publish'}
-                                        </button> */}
-                          </button>
-                        </div>
-                      )}
 
-                      {/* {activeMenu === quiz._id && currentUser.role !== 'STUDENT' && (
-                                                <div className="dropdown-menu show position-absolute" style={{ right: 0 }}>
-                                                    <button className="dropdown-item" onClick={() => handleEditQuiz(quiz._id)}>Edit</button>
-                                                    <button className="dropdown-item" onClick={() => handleDeleteQuiz(quiz._id)}>Delete</button>
-                                                    <button className="dropdown-item" onClick={() => handleTogglePublish(quiz)}>
-                                                        {quiz.published ? 'Unpublish' : 'Publish'}
-                                                    </button>
-                                                </div>
-                                            )} */}
-                    </div>
+                    {currentUser.role === 'FACULTY' && (
+                      <>
+                        <div className="float-end">
+                        {quiz.published ? <GreenCheckmark /> : <FaBan style={{ color: 'red' }} /> }
+                          {/* 单个作业最左端的三个竖着省略号按钮 */}
+                          <button
+                            className="btn btn-link me-1 float-end"
+                            onClick={() => setActiveMenu(activeMenu === quiz._id ? null : quiz._id)}
+                          >
+                            <IoEllipsisVertical className="fs-5 text-dark" />
+                          </button>
+                          {activeMenu === quiz._id && (
+                            <div className="dropdown-menu show position-absolute" style={{ right: 0 }}>
+                              <button className="dropdown-item" onClick={() => handleEditQuiz(quiz._id)}>
+                                Edit
+                              </button>
+                              <button className="dropdown-item" onClick={() => removeQuiz(quiz._id)}>
+                                Delete
+                              </button>
+                              <button className="dropdown-item" onClick={() => { togglePublish(quiz)}}>
+                                {quiz.published ? "Unpublish" : "Publish"}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                      </>
+                    )}
+
                   </div>
                 </li>
               ))}

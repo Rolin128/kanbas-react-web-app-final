@@ -63,11 +63,7 @@ export default function QuizEditor() {
       [name]: value,
     }));
   };
-  const createQuiz = async (quiz: any) => {
-    if (!cid) return;
-    const newQuiz = await coursesClient.createQuizForCourse(cid as string, quiz);
-    dispatch(addQuiz(newQuiz));
-  };
+
   const saveQuiz = async (quiz: any) => {
     await quizzesClient.updateQuiz(quiz);
     dispatch(updateQuiz(quiz));
@@ -77,7 +73,7 @@ export default function QuizEditor() {
       saveQuiz(quiz);
       router(`/Kanbas/Courses/${cid}/quizzes`);
     } else {
-      createQuiz({ ...quiz, _id: new Date().getTime().toString() });
+      // createQuiz({ ...quiz, _id: new Date().getTime().toString() });
       router(`/Kanbas/Courses/${cid}/quizzes`);
     }
   };
