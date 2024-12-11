@@ -6,6 +6,9 @@ import MCEditor from "./MultipleChoiceEditor";
 import TFEditor from "./TrueFalseEditor";
 import { FaTrash } from "react-icons/fa";
 import { Navigate } from "react-router-dom";
+
+
+import { setQuestions, addQuestion, editQuestion } from "./reducer";
 import {
   findQuizById,
   findAllQuestionsByQuizId,
@@ -175,12 +178,6 @@ export default function QuestionEditor() {
   const handleSaveChanges = async (index: number) => {
     try {
       const questionToSave = questions[index];
-
-      if (!questionToSave.answers || questionToSave.answers.length === 0) {
-        alert("Answers are required before saving a question.");
-        return;
-      }
-
       let savedQuestion;
       if (!questionToSave._id) {
         // Create a new question
