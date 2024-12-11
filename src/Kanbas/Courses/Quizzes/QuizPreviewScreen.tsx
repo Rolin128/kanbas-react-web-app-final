@@ -134,7 +134,7 @@ export default function QuizPreview() {
 
     questions.forEach((question: Question) => {
       console.log(">>>>question points:" + question.points);
-      if (answers[question._id] === question.answers[0]) {
+      if (answers[question._id].toLowerCase() === question.answers[0].toLowerCase()) {
         newScore += question.points;
       } else {
         incorrect.push(question._id);
@@ -182,15 +182,18 @@ export default function QuizPreview() {
     }
     // Call fetch details again, to accurately set submitCount and attemptsLeft.
     await fetchQuizDetails();
-    setSubmitted(true);
     console.log("Quiz submitted successfully:", answers, "Score:", newScore);
 
-    if (timer) {
+    if (timer && attemptsLeft == 0) {
       clearInterval(timer);
       setTimer(null);
+      setTimeLeft(0); // set the time to view results as 0 so results will immediately show
+      setSubmitted(true);
     }
+  };
 
-    setTimeLeft(0); // set the time to view results as 0 so results will immediately show
+  const checkCanRetake = () => {
+    return (attemptsLeft === null || attemptsLeft > 0) && timeLeft > 0;
   };
 
   const handleRetakeQuiz = () => {
@@ -294,7 +297,9 @@ export default function QuizPreview() {
       {questions.map((question: Question, index: number) => (
         <div
           key={question._id}
-          className={`card mb-3 ${incorrectQuestions.includes(question._id) ? "border-danger" : ""}`}
+          className={`card mb-3 ${
+            incorrectQuestions.includes(question._id) ? "border-danger" : submitCount == 0 ? "" : "border-success"
+          }`}
         >
           <div className="card-header d-flex justify-content-between">
             <h5>Question {index + 1}</h5>
@@ -371,7 +376,8 @@ export default function QuizPreview() {
               View Results
             </button>
           )}
-          {(attemptsLeft === null || attemptsLeft > 0) && timeLeft > 0 ? (
+          {/* {(attemptsLeft === null || attemptsLeft > 0) && timeLeft > 0 ? ( */}
+          {checkCanRetake() ? (
             <button onClick={handleSubmit} className="btn btn-primary float-end m-1">
               Submit Quiz
             </button>
