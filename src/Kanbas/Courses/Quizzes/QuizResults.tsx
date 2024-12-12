@@ -45,6 +45,7 @@ export default function QuizResults() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
   const [score, setScore] = useState<number>(0);
+  const [attemptTime, setAttemptTime] = useState<String>("");
   const [quizDetails, setQuizDetails] = useState<Quiz | null>(null);
   const currentUser = useSelector(selectCurrentUser);
 
@@ -64,6 +65,9 @@ export default function QuizResults() {
       if (fetchedQuizDetails.attemptHistory && fetchedQuizDetails.attemptHistory.lastAttemptAnswers) {
         const answersArray = answersJsonToArray(fetchedQuizDetails.attemptHistory.lastAttemptAnswers);
         setUserAnswers(answersArray);
+      }
+      if (fetchedQuizDetails.attemptHistory && fetchedQuizDetails.attemptHistory.lastAttemptTime) {
+        setAttemptTime(fetchedQuizDetails.attemptHistory.lastAttemptTime);
       }
     } catch (error) {
       console.error("Error fetching quiz details:", error);
@@ -95,6 +99,7 @@ export default function QuizResults() {
   return (
     <div className="container mt-4">
       <h2 className="quiz-title text-center">{quizDetails?.title}</h2>
+      <h3 className="score text-center">Quiz was taken at: {attemptTime}</h3>
       <h3 className="score text-center">Your Score: {score}</h3>
       {questions.map((question: Question) => {
         const userAnswer = userAnswers.find((answer: Answer) => answer.questionId === question._id);
