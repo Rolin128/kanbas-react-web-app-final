@@ -30,9 +30,7 @@ interface Question {
 
 interface Quiz {
   _id: string;
-  points: Number;
-  question_num:Number;
-  point_Totle:Number;
+  points: number;
 }
 
 export default function QuestionEditor() {
@@ -40,7 +38,6 @@ export default function QuestionEditor() {
   const { qid } = useParams<{ qid: string }>();
   const [questions, setQuestions] = useState<any[]>([]);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [newQuiz, setNewQuiz] = useState<Quiz | null>(null);
   const [originalQuestions, setOriginalQuestions] = useState<any[]>([]); // For reverting edits
 
   // Calculate total points dynamically
@@ -76,19 +73,7 @@ export default function QuestionEditor() {
       answers: [],
       isEditing: true, // Start in edit mode
     };
-    // setQuestions([...questions, newQuestion]);
-    const updatedQuestions = [...questions, newQuestion];
-    setQuestions(updatedQuestions);
-    const knk = updatedQuestions.length;
-    if (quiz) {
-      setQuiz({
-        ...quiz,
-        question_num: updatedQuestions.length,
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
-      });
-    }
-  
+    setQuestions([...questions, newQuestion]);
   };
 
   const handleSaveQuiz = async () => {
@@ -99,12 +84,6 @@ export default function QuestionEditor() {
       if (!quiz) {
         throw new Error("Quiz object is not initialized.");
       }
-      const updatedQuiz = {
-        ...quiz,
-        question_num: questions.length,  // 确保使用最新的问题数量
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
-      };
 
       let savedQuiz;
       if (qid) {
@@ -112,7 +91,7 @@ export default function QuestionEditor() {
         if (!quiz._id) {
           throw new Error("Quiz ID is missing.");
         } else {
-          savedQuiz = await updateQuiz(updatedQuiz);
+          savedQuiz = await updateQuiz(quiz);
           setQuiz(savedQuiz); // Update state with the new quiz
         }
       }
@@ -124,7 +103,7 @@ export default function QuestionEditor() {
 
       for (const question of questions) {
         if (question._id) {
-          await updateQuestion(question._id, question);
+          await updateQuestion(quizIdToUse, question);
         } else {
           await createQuestion(quizIdToUse, question);
         }
@@ -198,13 +177,19 @@ export default function QuestionEditor() {
   const handleSaveChanges = async (index: number) => {
     try {
       const questionToSave = questions[index];
+
+      if (!questionToSave.answers || questionToSave.answers.length === 0) {
+        alert("Answers are required before saving a question.");
+        return;
+      }
+
       let savedQuestion;
       if (!questionToSave._id) {
         // Create a new question
         savedQuestion = await createQuestion(qid!, questionToSave);
       } else {
         // Update existing question
-        savedQuestion = await updateQuestion(questionToSave._id!, questionToSave);
+        savedQuestion = await updateQuestion(qid!, questionToSave);
       }
 
       // Update the question in the state with the saved version and exit editing mode
@@ -212,17 +197,6 @@ export default function QuestionEditor() {
       // updatedQuestions[index] = { ...savedQuestion, isEditing: false };
       updatedQuestions[index] = { ...questions[index], ...savedQuestion, isEditing: false };
       setQuestions(updatedQuestions);
-      const updatedQuiz = {
-        ...quiz,
-        question_num: questions.length,  // 确保使用最新的问题数量
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
-      };
-      let savedQuiz;
-         savedQuiz = await updateQuiz(updatedQuiz);
-          setQuiz(savedQuiz); // Update state with the new quiz
-
-      
 
       alert("Question saved successfully!");
     } catch (error) {
@@ -240,18 +214,7 @@ export default function QuestionEditor() {
 
     try {
       await deleteQuestion(questionId); // Backend call for saved questions
-      const updatedQuestions = questions.filter((q) => q._id !== questionId);
-      setQuestions(updatedQuestions);
-      if (quiz) {
-        const updatedQuiz = {
-          ...quiz,
-          question_num: updatedQuestions.length,
-          points:totalPoints,
-          point_Totle:totalPoints
-        };
-        setQuiz(updatedQuiz);
-        await updateQuiz(updatedQuiz);  // 同步到后端
-      }
+      setQuestions(questions.filter((q) => q._id !== questionId)); // Remove from state
       alert("Question deleted successfully!");
     } catch (error) {
       console.error("Error deleting question:", error);
