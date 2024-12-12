@@ -25,6 +25,8 @@ export default function QuizEditor() {
     description: "",
     published: false,
 
+    question_num: 0,
+
     points: 100,
     due: "",
     available: "",
@@ -44,6 +46,7 @@ export default function QuizEditor() {
         available: qidQuiz.available || "",
         until: qidQuiz.until || "",
         published: qidQuiz.published || false,
+        question_num: qidQuiz.question_num ||0,
       });
     }
   }, [qidQuiz]);

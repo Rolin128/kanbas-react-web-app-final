@@ -50,7 +50,7 @@ export default function Profile() {
                     <input defaultValue={profile.lastName} id="wd-lastname" className="form-control mb-2"
                         placeholder="lastname"
                         onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} />
-                    <input defaultValue={profile.dob} id="wd-dob" className="form-control mb-2"
+                    <input id="wd-dob" className="form-control mb-2" value={profile.dob}
                         onChange={(e) => setProfile({ ...profile, dob: e.target.value })} type="date" />
                     <input defaultValue={profile.email} id="wd-email" className="form-control mb-2"
                         placeholder="xxx@gmail.com"
