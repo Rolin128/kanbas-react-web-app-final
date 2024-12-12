@@ -31,8 +31,8 @@ interface Question {
 interface Quiz {
   _id: string;
   points: Number;
-  question_num:Number;
-  point_Totle:Number;
+  question_num: Number;
+  point_Totle: Number;
 }
 
 export default function QuestionEditor() {
@@ -45,25 +45,25 @@ export default function QuestionEditor() {
 
   // Calculate total points dynamically
   const totalPoints = questions.reduce((sum, question) => sum + (question.points || 0), 0);
+  const fetchQuizData = async () => {
+    if (!qid) return;
+
+    try {
+      const fetchedQuiz = await findQuizById(qid);
+      setQuiz(fetchedQuiz);
+
+      const fetchedQuestions = await findAllQuestionsByQuizId(qid);
+      setQuestions(
+        fetchedQuestions.map((q: any) => ({ ...q, isEditing: false })) // Add isEditing flag
+      );
+    } catch (error) {
+      console.error("Error fetching quiz or questions:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchQuizData = async () => {
-      if (!qid) return;
-
-      try {
-        const fetchedQuiz = await findQuizById(qid);
-        setQuiz(fetchedQuiz);
-
-        const fetchedQuestions = await findAllQuestionsByQuizId(qid);
-        setQuestions(
-          fetchedQuestions.map((q: any) => ({ ...q, isEditing: false })) // Add isEditing flag
-        );
-      } catch (error) {
-        console.error("Error fetching quiz or questions:", error);
-      }
-    };
-
     fetchQuizData();
+    console.log(">>>questions", questions);
   }, [qid]);
 
   const handleAddQuestion = () => {
@@ -84,11 +84,10 @@ export default function QuestionEditor() {
       setQuiz({
         ...quiz,
         question_num: updatedQuestions.length,
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
+        point_Totle: totalPoints,
+        points: Math.floor(totalPoints),
       });
     }
-  
   };
 
   const handleSaveQuiz = async () => {
@@ -101,9 +100,9 @@ export default function QuestionEditor() {
       }
       const updatedQuiz = {
         ...quiz,
-        question_num: questions.length,  // 确保使用最新的问题数量
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
+        question_num: questions.length, // 确保使用最新的问题数量
+        point_Totle: totalPoints,
+        points: Math.floor(totalPoints),
       };
 
       let savedQuiz;
@@ -130,7 +129,8 @@ export default function QuestionEditor() {
         }
       }
 
-      alert("Quiz and questions saved successfully!");
+      fetchQuizData();
+      // alert("Quiz and questions saved successfully!");
     } catch (error) {
       console.error("Error saving quiz:", error);
       alert(`Failed to save quiz: ${error}`);
@@ -214,15 +214,13 @@ export default function QuestionEditor() {
       setQuestions(updatedQuestions);
       const updatedQuiz = {
         ...quiz,
-        question_num: questions.length,  // 确保使用最新的问题数量
-        point_Totle:totalPoints,
-        points: Math.floor(totalPoints) 
+        question_num: questions.length, // 确保使用最新的问题数量
+        point_Totle: totalPoints,
+        points: Math.floor(totalPoints),
       };
       let savedQuiz;
-         savedQuiz = await updateQuiz(updatedQuiz);
-          setQuiz(savedQuiz); // Update state with the new quiz
-
-      
+      savedQuiz = await updateQuiz(updatedQuiz);
+      setQuiz(savedQuiz); // Update state with the new quiz
 
       alert("Question saved successfully!");
     } catch (error) {
@@ -246,11 +244,11 @@ export default function QuestionEditor() {
         const updatedQuiz = {
           ...quiz,
           question_num: updatedQuestions.length,
-          points:totalPoints,
-          point_Totle:totalPoints
+          points: totalPoints,
+          point_Totle: totalPoints,
         };
         setQuiz(updatedQuiz);
-        await updateQuiz(updatedQuiz);  // 同步到后端
+        await updateQuiz(updatedQuiz); // 同步到后端
       }
       alert("Question deleted successfully!");
     } catch (error) {
@@ -426,7 +424,12 @@ export default function QuestionEditor() {
         </button>
       </div>
       <div className="d-flex justify-content-end mt-3">
-        <button className="btn btn-secondary me-2" onClick={() => {}}>
+        <button
+          className="btn btn-secondary me-2"
+          onClick={() => {
+            fetchQuizData();
+          }}
+        >
           Cancel
         </button>
         <button className="btn btn-danger" onClick={handleSaveQuiz}>
