@@ -113,6 +113,7 @@ export default function Quizzes() {
       webcamRequired: true,
       accessCode: "",
       points: 100,
+      question_num: 0,
       due: "",
       available: "",
       until: "",
@@ -180,7 +181,7 @@ export default function Quizzes() {
                         <br />
                         <div className="text-secondary" style={{ fontSize: "0.8rem" }}>
                           {quizAvailable(quiz)} &nbsp;|&nbsp; <b>Due</b> {formatDate(quiz.due)} &nbsp;|&nbsp;
-                          {quiz.points} pts &nbsp;|&nbsp; xx Questions
+                          {quiz.points} pts &nbsp;|&nbsp; {quiz.question_num} Questions
                         </div>
                       </div>
                     </div>
